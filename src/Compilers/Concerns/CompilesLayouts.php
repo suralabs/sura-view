@@ -86,6 +86,7 @@ trait  CompilesLayouts
         return $this->phpTag . '$this->stopSection(true); ?>';
     }
 
+
     /**
      * Compile the stop statements into valid PHP.
      *
