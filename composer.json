@@ -1,10 +1,10 @@
 {
-    "name": "sura/framework",
-    "description": "The Sura framework.",
-    "keywords": ["framework", "sura","router", "mvc"],
+    "name": "sura/view",
+    "description": "The Sura view.",
+    "keywords": ["view", "tpl"],
     "license": "MIT",
     "type": "library",
-    "version": "1.0",
+    "version": "1.1",
     "authors": [
       {
           "name": "Semen Alekseev",
@@ -27,7 +27,7 @@
         "src/helpers.php"
       ],
       "psr-4": {
-          "Sura\\": "src/"
+          "Sura\\View\\": "src/"
       }
     }
 }
