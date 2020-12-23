@@ -1,5 +1,10 @@
 <?php
 
+use Sura\Libs\Langs;
+use Sura\Libs\Registry;
+use Sura\Libs\Request;
+use Sura\View\Blade;
+
 /**
  * Run the blade engine. It returns the result of the code.
  *
