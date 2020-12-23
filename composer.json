@@ -4,7 +4,6 @@
     "keywords": ["view", "tpl"],
     "license": "MIT",
     "type": "library",
-    "version": "1.3",
     "authors": [
       {
           "name": "Semen Alekseev",
