@@ -12,11 +12,13 @@
       }
     ],
     "require": {
+
       "php": "^8.0",
       "ext-json": "*",
       "ext-iconv": "*",
       "ext-gd": "*",
-      "ext-mysqli": "*"
+      "ext-mysqli": "*",
+      "sura/framework": "^0.9.1"
     },
     "require-dev": {
       "phpunit/phpunit": "^9.2"

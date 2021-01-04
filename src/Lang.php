@@ -18,7 +18,7 @@ trait Lang
      *
      * @return string
      */
-    public function _e($phrase)
+    public function _e($phrase): string
     {
         if ((!\array_key_exists($phrase, static::$dictionary))) {
             $this->missingTranslation($phrase);
@@ -36,7 +36,7 @@ trait Lang
      *
      * @return string
      */
-    public function _ef($phrase)
+    public function _ef($phrase): string
     {
         $argv = \func_get_args();
         $r = $this->_e($phrase);
@@ -52,11 +52,11 @@ trait Lang
      *
      * @param string $phrase
      * @param string $phrases
-     * @param int    $num
+     * @param int $num
      *
      * @return string
      */
-    public function _n($phrase, $phrases, $num = 0)
+    public function _n(string $phrase, string $phrases, $num = 0)
     {
         if ((!\array_key_exists($phrase, static::$dictionary))) {
             $this->missingTranslation($phrase);
@@ -75,7 +75,7 @@ trait Lang
      *
      * @return string
      */
-    protected function compile_e($expression)
+    protected function compile_e($expression): string
     {
         return $this->phpTag . "echo \$this->_e{$expression}; ?>";
     }
@@ -87,7 +87,7 @@ trait Lang
      *
      * @return string
      */
-    protected function compile_ef($expression)
+    protected function compile_ef($expression): string
     {
         return $this->phpTag . "echo \$this->_ef{$expression}; ?>";
     }
@@ -99,7 +99,7 @@ trait Lang
      *
      * @return string
      */
-    protected function compile_n($expression)
+    protected function compile_n($expression): string
     {
         return $this->phpTag . "echo \$this->_n{$expression}; ?>";
     }
@@ -112,7 +112,7 @@ trait Lang
      *
      * @param string $txt Message to write on.
      */
-    private function missingTranslation($txt)
+    private function missingTranslation(string $txt)
     {
         if (!$this->missingLog) {
             return; // if there is not a file assigned then it skips saving.

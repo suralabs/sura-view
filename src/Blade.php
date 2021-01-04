@@ -254,7 +254,7 @@ class Blade
      * @param string|null $format
      * @return string
      */
-    public function format($variable, $format = null)
+    public function format($variable, $format = null): string
     {
         if ($variable instanceof \DateTime) {
             $format = $format === null ? 'Y/m/d' : $format;
@@ -270,7 +270,7 @@ class Blade
      * @param string $value
      * @return string
      */
-    public static function e($value)
+    public static function e(string $value)
     {
 //        return (\is_array($value) || \is_object($value))
 //            ? \htmlentities(\print_r($value, true), ENT_QUOTES, 'UTF-8', false)
@@ -286,7 +286,7 @@ class Blade
      * @param string $value
      * @return string
      */
-    public static function enq($value)
+    public static function enq(string $value): string
     {
 //        if (\is_array($value) || \is_object($value)) {
 //            return \htmlentities(\print_r($value, true), ENT_NOQUOTES, 'UTF-8', false);
@@ -2998,7 +2998,7 @@ class Blade
      * @return string
      * @\Sura\Libs\Blade::$pipeEnable
      */
-    protected function pipeDream($result)
+    protected function pipeDream(string $result): string
     {
         $array = preg_split('~\\\\.(*SKIP)(*FAIL)|\|~s', $result);
         $c = count($array) - 1; // base zero.
