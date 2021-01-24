@@ -1,7 +1,12 @@
 <?php
+declare(strict_types=1);
 
 namespace Sura\View\Compilers\Concerns;
 
+/**
+ * Trait CompilesLayouts
+ * @package Sura\View\Compilers\Concerns
+ */
 trait  CompilesLayouts
 {
 
@@ -11,7 +16,7 @@ trait  CompilesLayouts
      * @param string $expression
      * @return string
      */
-    protected function compileExtends($expression)
+    protected function compileExtends(string $expression): string
     {
         $expression = $this->stripParentheses($expression);
         // $_shouldextend avoids to runchild if it's not evaluated.
@@ -29,7 +34,7 @@ trait  CompilesLayouts
      * @param string $expression
      * @return string
      */
-    protected function compileSection($expression)
+    protected function compileSection(string $expression): string
     {
         return $this->phpTag . "\$this->startSection{$expression}; ?>";
     }
@@ -40,7 +45,7 @@ trait  CompilesLayouts
      * @return string
      * @see extendSection
      */
-    protected function compileParent()
+    protected function compileParent(): string
     {
         return $this->PARENTKEY;
     }
@@ -51,7 +56,7 @@ trait  CompilesLayouts
      * @param string $expression
      * @return string
      */
-    protected function compileYield($expression)
+    protected function compileYield(string $expression): string
     {
         return $this->phpTagEcho . "\$this->yieldContent{$expression}; ?>";
     }
@@ -61,7 +66,7 @@ trait  CompilesLayouts
      *
      * @return string
      */
-    protected function compileShow()
+    protected function compileShow(): string
     {
         return $this->phpTagEcho . '$this->yieldSection(); ?>';
     }
@@ -71,7 +76,7 @@ trait  CompilesLayouts
      *
      * @return string
      */
-    protected function compileAppend()
+    protected function compileAppend(): string
     {
         return $this->phpTag . '$this->appendSection(); ?>';
     }
@@ -81,7 +86,7 @@ trait  CompilesLayouts
      *
      * @return string
      */
-    protected function compileOverwrite()
+    protected function compileOverwrite(): string
     {
         return $this->phpTag . '$this->stopSection(true); ?>';
     }
@@ -91,7 +96,7 @@ trait  CompilesLayouts
      *
      * @return string
      */
-    protected function compileStop()
+    protected function compileStop(): string
     {
         return $this->phpTag . '$this->stopSection(); ?>';
     }
@@ -101,7 +106,7 @@ trait  CompilesLayouts
      *
      * @return string
      */
-    protected function compileEndsection()
+    protected function compileEndsection(): string
     {
         return $this->phpTag . '$this->stopSection(); ?>';
     }

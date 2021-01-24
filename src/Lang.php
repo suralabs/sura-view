@@ -1,17 +1,22 @@
 <?php
+declare(strict_types=1);
+namespace Sura\View;
 
-namespace  Sura\View;
-
+/**
+ * Trait Lang
+ * @package Sura\View
+ */
 trait Lang
 {
     /** @var string The path to the missing translations log file. If empty then every missing key is not saved. */
-    public $missingLog = '';
+//    public string $missingLog = '';
 
     /** @var array Hold dictionary of translations */
-    public static $dictionary = [];
+//    public static  $dictionary = [];
+    public static array $dictionary = [];
 
     /**
-     * Tries to translate the word if its in the array defined by Blade::$dictionary
+     * Tries to translate the word if its in the array defined by View::$dictionary
      * If the operation fails then, it returns the original expression without translation.
      *
      * @param $phrase
@@ -23,9 +28,9 @@ trait Lang
         if ((!\array_key_exists($phrase, static::$dictionary))) {
             $this->missingTranslation($phrase);
             return $phrase;
-        } else {
-            return static::$dictionary[$phrase];
         }
+
+        return static::$dictionary[$phrase];
     }
 
     /**
@@ -41,7 +46,7 @@ trait Lang
         $argv = \func_get_args();
         $r = $this->_e($phrase);
         $argv[0] = $r; // replace the first argument with the translation.
-        $result = @\call_user_func_array("sprintf", $argv);
+        $result = sprintf(...$argv);
         $result = ($result === false) ? $r : $result;
         return $result;
     }
@@ -56,14 +61,14 @@ trait Lang
      *
      * @return string
      */
-    public function _n(string $phrase, string $phrases, $num = 0)
+    public function _n(string $phrase, string $phrases, $num = 0): string
     {
         if ((!\array_key_exists($phrase, static::$dictionary))) {
             $this->missingTranslation($phrase);
             return ($num <= 1) ? $phrase : $phrases;
-        } else {
-            return ($num <= 1) ? $this->_e($phrase) : $this->_e($phrases);
         }
+
+        return ($num <= 1) ? $this->_e($phrase) : $this->_e($phrases);
     }
 
     //<editor-fold desc="compile">
@@ -112,10 +117,10 @@ trait Lang
      *
      * @param string $txt Message to write on.
      */
-    private function missingTranslation(string $txt)
+    private function missingTranslation(string $txt): bool|string
     {
         if (!$this->missingLog) {
-            return; // if there is not a file assigned then it skips saving.
+            return true; // if there is not a file assigned then it skips saving.
         }
 
         $fz = @\filesize($this->missingLog);
@@ -133,5 +138,6 @@ trait Lang
         $fp = \fopen($this->missingLog, 'w');
         \fwrite($fp, $txt . "\n");
         \fclose($fp);
+        return true;
     }
 }

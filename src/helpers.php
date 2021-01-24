@@ -1,67 +1,85 @@
 <?php
+declare(strict_types=1);
 
 use Sura\Libs\Langs;
 use Sura\Libs\Registry;
 use Sura\Libs\Request;
-use Sura\View\Blade;
+use Sura\View\View;
 
-/**
- * Run the blade engine. It returns the result of the code.
- *
- * @param string|null $view The name of the cache. Ex: "folder.folder.view" ("/folder/folder/view.blade")
- * @param array $variables An associative arrays with the values to display.
- * @return string
- * @throws Exception
- */
-function view(?string $view, $variables = []): string
-{
-    $views = __DIR__ . '/views';
-    $cache = __DIR__ . '/cache/views';
-
-    class myBlade extends Blade
+if (!function_exists('view')) {
+    /**
+     * Run the blade engine. It returns the result of the code.
+     *
+     * @param string|null $view The name of the cache. Ex: "folder.folder.view" ("/folder/folder/view.blade")
+     * @param array $variables An associative arrays with the values to display.
+     * @return int
+     */
+    function view(?string $view, mixed $variables = []): int
     {
-        use Sura\View\Lang;
+        return _e(view_data($view, $variables));
     }
+}
 
-    $blade = new myBlade($views,$cache,Blade::MODE_AUTO); // MODE_DEBUG allows to pinpoint troubles.
-    $blade::$dictionary = langs::get_langs();
+if (!function_exists('view_data')) {
 
-    $variables['url'] = 'https://'.$_SERVER['HTTP_HOST'];
-    $blade->setBaseUrl('https://'.$_SERVER['HTTP_HOST']);
 
-    $blade->csrfIsValid(true, '_mytoken');
-    $logged = Registry::get('logged');
-    if (!empty($logged)){
-        $blade->setAuth('john_doe','user');
-    }
+    function view_data(?string $view, $variables = []): string
+    {
+        $views = resolve('app')->get('path.base').DIRECTORY_SEPARATOR . 'app/views';
+        $cache = resolve('app')->get('path.base').DIRECTORY_SEPARATOR  . 'app/cache/views';
 
-    try {
-        if (Request::ajax()){
-            $json_content = $blade->run($view, $variables);
-            $title = $variables['title'];
-            if (!empty($logged)){
-                $result_ajax = array(
-                    'title' => $title,
-//                        'new_notifications' => $params['notify_count'],
-                    'content' => $json_content
-                );
-            }else{
-                $result_ajax = array(
-                    'title' => $title,
-                    'content' => $json_content
-                );
-            }
-            header('Content-Type: application/json');
-            $response = json_encode($result_ajax);
-        }else{
-
-            header('Access-Control-Allow-Origin: *');
-            $response = $blade->run($view, $variables);
+        /**
+         * Class myView
+         */
+        class myView extends View
+        {
+            use Sura\View\Lang;
         }
-    } catch (Exception $e) {
-        $response = "error found ".$e->getMessage()."<br>".$e->getTraceAsString();
+
+        $blade = new myView($views, $cache, View::MODE_AUTO); // MODE_DEBUG allows to pinpoint troubles.
+        $blade::$dictionary = langs::get_langs();
+
+//        $variables['title'] = 'Sura';
+        $variables['url'] = 'https://' . $_SERVER['HTTP_HOST'];
+        $blade->setBaseUrl('https://' . $_SERVER['HTTP_HOST']);
+
+        $blade->csrfIsValid(true, '_mytoken');
+        $logged = Registry::get('logged');
+        if ($logged) {
+            $user = Registry::get('user_info');
+            $variables['user'] = $user;
+            $blade->setAuth($user['user_search_pref'], 'user');
+//        $blade->setAuth('john_doe','user');
+        }
+        try {
+            if (Request::ajax()) {
+                $json_content = $blade->run($view, $variables);
+                $title = $variables['title'];
+                if ($logged) {
+                    $result_ajax = array(
+                        'title' => $title,
+//                        'new_notifications' => $params['notify_count'],
+                        'content' => $json_content
+                    );
+                } else {
+                    $result_ajax = array(
+                        'title' => $title,
+                        'content' => $json_content
+                    );
+                }
+                header('Content-Type: application/json');
+                $json = json_encode($result_ajax, JSON_THROW_ON_ERROR);
+                $response = $blade->run("app.json", ['json' => $json]);
+            } else {
+
+                header('Access-Control-Allow-Origin: *');
+                $response = $blade->run($view, $variables);
+            }
+        } catch (Exception $e) {
+            $response = "error found " . $e->getMessage() . "<br>" . $e->getTraceAsString();
+        }
+        return ($response);
     }
-    return _e($response);
 }
 
 if (! function_exists('_e')) {
@@ -69,9 +87,9 @@ if (! function_exists('_e')) {
      * Encode HTML special characters in a string.
      *
      * @param string $value
-     * @return string
+     * @return int
      */
-    function _e(string $value): string
+    function _e(string $value): int
     {
         return print($value);
     }
