@@ -5,6 +5,7 @@ use Sura\Libs\Langs;
 use Sura\Libs\Registry;
 use Sura\Libs\Request;
 use Sura\View\View;
+use function Sura\resolve;
 
 if (!function_exists('view')) {
     /**
