@@ -1,1 +1,2 @@
-# sura-view
+# Blade Template Engine
+Sura\View is a standalone version of Blade Template Engine that uses a single PHP file and can be ported and used in different projects. It allows you to use blade template outside Laravel.
