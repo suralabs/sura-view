@@ -49,7 +49,7 @@ class View
     public static array $dictionary = [];
     /** @var string PHP tag. You could use < ?php or < ? (if shorttag is active in php.ini) */
     public string $phpTag = '<?php '; // hello hello hello.
-    /** @var string  */
+    /** @var string */
     public string $phpTagEcho = '<?php echo ';
     /** @var string $currentUser Current user. Example: john */
     public string $currentUser;
@@ -79,9 +79,9 @@ class View
     protected array $sections = [];
     /** @var string The template currently being compiled. For example "folder.template" */
     protected string $fileName;
-    /** @var  */
+    /** @var */
     protected $currentView;
-    /** @var  */
+    /** @var */
     protected $notFoundPath;
     /** @var string File extension for the template files. */
     protected string $fileExtension = '.blade.php';
@@ -698,7 +698,7 @@ class View
     public function addAssetDict($name, $url = '')
     {
         if (\is_array($name)) {
-            if ($this->assetDict===null) {
+            if ($this->assetDict === null) {
                 $this->assetDict = $name;
             } else {
                 $this->assetDict = \array_merge($this->assetDict, $name);
@@ -1270,7 +1270,7 @@ class View
      * @param string $templateName template name. If not template is set then it uses the base template.
      * @return string
      */
-    public function getTemplateFile($templateName = ''):string
+    public function getTemplateFile($templateName = ''): string
     {
         $templateName = (empty($templateName)) ? $this->fileName : $templateName;
 
@@ -2043,16 +2043,16 @@ class View
     {
         $name = \array_pop($this->componentStack);
         //return $this->runChild($name, $this->componentData());
-        $cd=$this->componentData();
+        $cd = $this->componentData();
         if (!is_array($cd)) {
-            $keys=array_keys($cd);
+            $keys = array_keys($cd);
             foreach ($keys as $key) {
                 if (isset($this->variables[$key])) {
-                    $backup[$key]=$this->variables[$key];
+                    $backup[$key] = $this->variables[$key];
                 }
             }
         }
-        $r=$this->runChild($name, $cd);
+        $r = $this->runChild($name, $cd);
         if (!isset($keys)) {
             return $r;
         }
@@ -2551,10 +2551,10 @@ class View
         if (!$text || strlen($text) < 2) {
             return $text;
         }
-        $text=trim($text);
-        $p0=$text[0];
-        $p1=\substr($text, -1);
-        if ($p0===$p1 && ($p0==='"' || $p0==="'")) {
+        $text = trim($text);
+        $p0 = $text[0];
+        $p1 = \substr($text, -1);
+        if ($p0 === $p1 && ($p0 === '"' || $p0 === "'")) {
             return \substr($text, 1, -1);
         }
         return $text;
@@ -2573,9 +2573,6 @@ class View
         }
         return $value;
     }
-
-
-
 
 
     /**
@@ -2910,9 +2907,9 @@ class View
         for ($i = $c; $i >= 1; $i--) {
             $r = @explode(':', $array[$i], 2);
             $fnName = trim($r[0]);
-            $fnNameF=$fnName[0]; // first character
+            $fnNameF = $fnName[0]; // first character
             if ($fnNameF === '"' || $fnNameF === '\'' || $fnNameF === '$' || is_numeric($fnNameF)) {
-                $fnName='!isset('.$array[0].') ? '.$fnName.' : ';
+                $fnName = '!isset(' . $array[0] . ') ? ' . $fnName . ' : ';
             } else {
                 if (isset($this->customDirectives[$fnName])) {
                     $fnName = '$this->customDirectives[\'' . $fnName . '\']';

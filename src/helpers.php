@@ -26,8 +26,8 @@ if (!function_exists('view_data')) {
 
     function view_data(?string $view, $variables = []): string
     {
-        $views = resolve('app')->get('path.base').DIRECTORY_SEPARATOR . 'app/views';
-        $cache = resolve('app')->get('path.base').DIRECTORY_SEPARATOR  . 'app/cache/views';
+        $views = resolve('app')->get('path.base') . DIRECTORY_SEPARATOR . 'app/views';
+        $cache = resolve('app')->get('path.base') . DIRECTORY_SEPARATOR . 'app/cache/views';
 
         /**
          * Class myView
@@ -83,7 +83,7 @@ if (!function_exists('view_data')) {
     }
 }
 
-if (! function_exists('_e')) {
+if (!function_exists('_e')) {
     /**
      * Encode HTML special characters in a string.
      *
