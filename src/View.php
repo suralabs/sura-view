@@ -11,8 +11,6 @@ use Exception;
 use InvalidArgumentException;
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\Pure;
-use Sura\View\Compilers\Concerns\CompilesAuthorizations;
-use Sura\View\Compilers\Concerns\CompilesLayouts;
 
 /**
  * View - A View Template implementation
@@ -434,9 +432,9 @@ class View
      * Strip the parentheses from the given expression.
      *
      * @param string $expression
-     * @return string
+     * @return string FIXME
      */
-    public function stripParentheses(string $expression): string
+    public function stripParentheses(mixed $expression): mixed
     {
         if (static::startsWith($expression, '(')) {
             $expression = \substr($expression, 1, -1);
@@ -451,12 +449,14 @@ class View
      * @param string|array $needles
      * @return bool
      */
-    public static function startsWith(string $haystack, array|string $needles): bool
+    public static function startsWith(mixed $haystack, array|string $needles): bool
     {
         foreach ((array)$needles as $needle) {
             if ($needle != '') {
                 if (\function_exists('mb_strpos')) {
-                    if (\mb_strpos($haystack, $needle) === 0) {
+
+                    //FIXME
+                    if (\mb_strpos((string)$haystack, $needle) === 0) {
                         return true;
                     }
                 } elseif (str_starts_with($haystack, $needle)) {
