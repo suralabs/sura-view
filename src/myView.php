@@ -9,5 +9,5 @@ namespace Sura\View;
  */
 class myView extends View
 {
-    use Sura\View\Lang;
+    use Lang;
 }

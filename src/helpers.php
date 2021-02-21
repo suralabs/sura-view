@@ -4,6 +4,7 @@ declare(strict_types=1);
 use Sura\Libs\Langs;
 use Sura\Libs\Registry;
 use Sura\Libs\Request;
+use Sura\View\myView;
 use Sura\View\View;
 use function Sura\resolve;
 
