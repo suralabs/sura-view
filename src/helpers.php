@@ -29,14 +29,6 @@ if (!function_exists('view_data')) {
         $views = resolve('app')->get('path.base') . DIRECTORY_SEPARATOR . 'app/views';
         $cache = resolve('app')->get('path.base') . DIRECTORY_SEPARATOR . 'app/cache/views';
 
-        /**
-         * Class myView
-         */
-        class myView extends View
-        {
-            use Sura\View\Lang;
-        }
-
         $blade = new myView($views, $cache, View::MODE_AUTO); // MODE_DEBUG allows to pinpoint troubles.
         $blade::$dictionary = langs::get_langs();
 
