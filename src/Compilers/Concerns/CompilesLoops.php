@@ -179,7 +179,7 @@ trait CompilesLoops
      * @param string $expression
      * @return string
      */
-    protected function compileElseAuth($expression = ''): string
+    protected function compileElseAuth(string $expression = ''): string
     {
         $role = $this->stripParentheses($expression);
         if ($role == '') {
