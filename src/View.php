@@ -436,7 +436,7 @@ class View
      * @param string $expression
      * @return string
      */
-    public function stripParentheses($expression)
+    public function stripParentheses(string $expression): string
     {
         if (static::startsWith($expression, '(')) {
             $expression = \substr($expression, 1, -1);
