@@ -451,7 +451,7 @@ class View
      * @param string|array $needles
      * @return bool
      */
-    public static function startsWith($haystack, $needles)
+    public static function startsWith(string $haystack, array|string $needles): bool
     {
         foreach ((array)$needles as $needle) {
             if ($needle != '') {
@@ -459,7 +459,7 @@ class View
                     if (\mb_strpos($haystack, $needle) === 0) {
                         return true;
                     }
-                } elseif (\strpos($haystack, $needle) === 0) {
+                } elseif (str_starts_with($haystack, $needle)) {
                     return true;
                 }
             }
