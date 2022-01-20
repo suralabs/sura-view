@@ -187,6 +187,7 @@ class View
     private int $switchCount = 0;
     /** @var bool Indicates if the switch is recently open */
     private bool $firstCaseInSwitch = true;
+    public array $compileCallbacks;
 
     /**
      * Bob the constructor.
