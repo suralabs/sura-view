@@ -9,11 +9,11 @@ trait CompilesInjections
     /**
      * Resolve a given class using the injectResolver callable.
      *
-     * @param string $className
-     * @param null $variableName
+     * @param string      $className
+     * @param string|null $variableName
      * @return mixed
      */
-    protected function injectClass(string $className, $variableName = null): mixed
+    protected function injectClass($className, $variableName = null)
     {
         if (isset($this->injectResolver)) {
             return call_user_func($this->injectResolver, $className, $variableName);
@@ -29,11 +29,11 @@ trait CompilesInjections
      * @param string $expression
      * @return string
      */
-    protected function compileInject(string $expression): string
+    protected function compileInject($expression): string
     {
         $ex = $this->stripParentheses($expression);
         $p0 = \strpos($ex, ',');
-        if ($p0 == false) {
+        if (!$p0) {
             $var = $this->stripQuotes($ex);
             $namespace = '';
         } else {

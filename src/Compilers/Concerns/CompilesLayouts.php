@@ -9,14 +9,13 @@ namespace Sura\View\Compilers\Concerns;
  */
 trait  CompilesLayouts
 {
-
     /**
      * Compile the extends statements into valid PHP.
      *
      * @param string $expression
      * @return string
      */
-    protected function compileExtends(string $expression): string
+    protected function compileExtends($expression): string
     {
         $expression = $this->stripParentheses($expression);
         // $_shouldextend avoids to runchild if it's not evaluated.
@@ -29,17 +28,6 @@ trait  CompilesLayouts
     }
 
     /**
-     * Compile the section statements into valid PHP.
-     *
-     * @param string $expression
-     * @return string
-     */
-    protected function compileSection(string $expression): string
-    {
-        return $this->phpTag . "\$this->startSection{$expression}; ?>";
-    }
-
-    /**
      * Execute the @parent command. This operation works in tandem with extendSection
      *
      * @return string
@@ -48,66 +36,5 @@ trait  CompilesLayouts
     protected function compileParent(): string
     {
         return $this->PARENTKEY;
-    }
-
-    /**
-     * Compile the yield statements into valid PHP.
-     *
-     * @param string $expression
-     * @return string
-     */
-    protected function compileYield(string $expression): string
-    {
-        return $this->phpTagEcho . "\$this->yieldContent{$expression}; ?>";
-    }
-
-    /**
-     * Compile the show statements into valid PHP.
-     *
-     * @return string
-     */
-    protected function compileShow(): string
-    {
-        return $this->phpTagEcho . '$this->yieldSection(); ?>';
-    }
-
-    /**
-     * Compile the append statements into valid PHP.
-     *
-     * @return string
-     */
-    protected function compileAppend(): string
-    {
-        return $this->phpTag . '$this->appendSection(); ?>';
-    }
-
-    /**
-     * Compile the overwrite statements into valid PHP.
-     *
-     * @return string
-     */
-    protected function compileOverwrite(): string
-    {
-        return $this->phpTag . '$this->stopSection(true); ?>';
-    }
-
-    /**
-     * Compile the stop statements into valid PHP.
-     *
-     * @return string
-     */
-    protected function compileStop(): string
-    {
-        return $this->phpTag . '$this->stopSection(); ?>';
-    }
-
-    /**
-     * Compile the end-section statements into valid PHP.
-     *
-     * @return string
-     */
-    protected function compileEndsection(): string
-    {
-        return $this->phpTag . '$this->stopSection(); ?>';
     }
 }

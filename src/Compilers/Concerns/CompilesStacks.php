@@ -12,9 +12,9 @@ trait CompilesStacks
      * @param string $expression
      * @return string
      */
-    protected function compileStack(string $expression): string
+    protected function compileStack($expression): string
     {
-        return $this->phpTagEcho . "\$this->yieldPushContent{$expression}; ?>";
+        return $this->phpTagEcho . "\$this->yieldPushContent$expression; ?>";
     }
 
     /**
@@ -38,12 +38,13 @@ trait CompilesStacks
     }
 
     /**
-     * Compile the endpush statements into valid PHP.
+     * Compile the push statements into valid PHP.
      *
+     * @param string $expression
      * @return string
      */
-    protected function compileEndPrepend(): string
+    public function compilePrepend($expression): string
     {
-        return $this->phpTag . '$this->stopPrepend(); ?>';
+        return $this->phpTag . "\$this->startPush$expression; ?>";
     }
 }

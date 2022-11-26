@@ -12,9 +12,9 @@ trait CompilesComponents
      * @param string $expression
      * @return string
      */
-    protected function compileComponent(string $expression): string
+    protected function compileComponent($expression): string
     {
-        return $this->phpTag . " \$this->startComponent{$expression}; ?>";
+        return $this->phpTag . " \$this->startComponent$expression; ?>";
     }
 
     /**
@@ -35,7 +35,7 @@ trait CompilesComponents
      */
     protected function compileSlot($expression): string
     {
-        return $this->phpTag . " \$this->slot{$expression}; ?>";
+        return $this->phpTag . " \$this->slot$expression; ?>";
     }
 
     /**
@@ -47,5 +47,4 @@ trait CompilesComponents
     {
         return $this->phpTag . ' $this->endSlot(); ?>';
     }
-
 }
