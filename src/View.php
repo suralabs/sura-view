@@ -17,6 +17,22 @@ use InvalidArgumentException;
  */
 class View
 {
+
+    use Compilers\Concerns\CompilesAuthorizations,
+    Compilers\Concerns\CompilesComments,
+    Compilers\Concerns\CompilesComponents,
+    Compilers\Concerns\CompilesConditionals,
+    Compilers\Concerns\CompilesEchos,
+    Compilers\Concerns\CompilesErrors,
+    Compilers\Concerns\CompilesHelpers,
+    Compilers\Concerns\CompilesIncludes,
+    Compilers\Concerns\CompilesInjections,
+    Compilers\Concerns\CompilesJson,
+    Compilers\Concerns\CompilesLayouts,
+    Compilers\Concerns\CompilesLoops,
+    Compilers\Concerns\CompilesRawPhp,
+    Compilers\Concerns\CompilesStacks;
+    
     //<editor-fold desc="fields">
     public const VERSION = '4.7.1';
     /** @var int View reads if the compiled file has changed. If it has changed,then the file is replaced. */
