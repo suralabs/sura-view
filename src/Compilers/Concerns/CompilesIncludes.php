@@ -2,6 +2,9 @@
 
 namespace Sura\View\Compilers\Concerns;
 
+use function explode;
+use function is_file;
+
 trait CompilesIncludes
 {
     /**
@@ -28,10 +31,10 @@ trait CompilesIncludes
     {
         $expression = $this->stripParentheses($expression);
         $ex = $this->stripParentheses($expression);
-        $exp = \explode(',', $ex);
+        $exp = explode(',', $ex);
         $file = $this->stripQuotes($exp[0] ?? null);
         $fileC = $this->getCompiledFile($file);
-        if (!@\is_file($fileC)) {
+        if (!@is_file($fileC)) {
             // if the file doesn't exist then it's created
             $this->compile($file, true);
         }

@@ -2,13 +2,16 @@
 
 namespace Sura\View\Compilers\Concerns;
 
+use function explode;
+use function trim;
+
 trait CompilesJson
 {
     protected function compileJSon($expression): string
     {
-        $parts = \explode(',', $this->stripParentheses($expression));
-        $options = isset($parts[1]) ? \trim($parts[1]) : JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
-        $depth = isset($parts[2]) ? \trim($parts[2]) : 512;
+        $parts = explode(',', $this->stripParentheses($expression));
+        $options = isset($parts[1]) ? trim($parts[1]) : JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
+        $depth = isset($parts[2]) ? trim($parts[2]) : 512;
         return $this->phpTagEcho . "json_encode($parts[0], $options, $depth); ?>";
     }
 }

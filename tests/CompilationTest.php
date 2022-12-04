@@ -2,12 +2,13 @@
 
 namespace Tests;
 
+use Exception;
 use Sura\View\View;
 
 class CompilationTest extends AbstractBladeTestCase
 {
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testCompilation()
     {
@@ -15,7 +16,7 @@ class CompilationTest extends AbstractBladeTestCase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testCompilationCreatesCompiledFile()
     {
@@ -25,7 +26,7 @@ class CompilationTest extends AbstractBladeTestCase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testCompilationDebugCreatesCompiledFile()
     {
@@ -39,7 +40,7 @@ class CompilationTest extends AbstractBladeTestCase
 
     /**
      * For the issue #57. Version 3.16
-     * @throws \Exception
+     * @throws Exception
      */
     /*    public function testCompilationTemplateExist()
         {
@@ -50,7 +51,7 @@ class CompilationTest extends AbstractBladeTestCase
 
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testCompilationCustomCompileExtension()
     {

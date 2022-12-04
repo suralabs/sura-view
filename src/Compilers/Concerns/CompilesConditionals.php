@@ -2,6 +2,9 @@
 
 namespace Sura\View\Compilers\Concerns;
 
+use function substr;
+use function trim;
+
 trait CompilesConditionals
 {
     /**
@@ -23,7 +26,7 @@ trait CompilesConditionals
      */
     public function compilePushOnce($expression): string
     {
-        $key = '$__pushonce__' . \trim(\substr($expression, 2, -2));
+        $key = '$__pushonce__' . trim(substr($expression, 2, -2));
         return $this->phpTag . "if(!isset($key)): $key=1;  \$this->startPush$expression; ?>";
     }
 
@@ -68,7 +71,6 @@ trait CompilesConditionals
     {
         return $this->phpTag . 'endif; ?>';
     }
-
 
 
     /**
