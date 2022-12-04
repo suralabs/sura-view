@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Sura\View;
@@ -14,6 +15,7 @@ use ParseError;
 use ReflectionException;
 use ReflectionMethod;
 use RuntimeException;
+
 use function array_key_exists;
 use function array_keys;
 use function array_map;
@@ -89,20 +91,20 @@ use function var_dump;
  */
 class View
 {
-    use Compilers\Concerns\CompilesAuthorizations,
-        Compilers\Concerns\CompilesComments,
-        Compilers\Concerns\CompilesComponents,
-        Compilers\Concerns\CompilesConditionals,
-        Compilers\Concerns\CompilesEchos,
-        Compilers\Concerns\CompilesErrors,
-        Compilers\Concerns\CompilesHelpers,
-        Compilers\Concerns\CompilesIncludes,
-        Compilers\Concerns\CompilesInjections,
-        Compilers\Concerns\CompilesJson,
-        Compilers\Concerns\CompilesLayouts,
-        Compilers\Concerns\CompilesLoops,
-        Compilers\Concerns\CompilesRawPhp,
-        Compilers\Concerns\CompilesStacks;
+    use Compilers\Concerns\CompilesAuthorizations;
+    use Compilers\Concerns\CompilesComments;
+    use Compilers\Concerns\CompilesComponents;
+    use Compilers\Concerns\CompilesConditionals;
+    use Compilers\Concerns\CompilesEchos;
+    use Compilers\Concerns\CompilesErrors;
+    use Compilers\Concerns\CompilesHelpers;
+    use Compilers\Concerns\CompilesIncludes;
+    use Compilers\Concerns\CompilesInjections;
+    use Compilers\Concerns\CompilesJson;
+    use Compilers\Concerns\CompilesLayouts;
+    use Compilers\Concerns\CompilesLoops;
+    use Compilers\Concerns\CompilesRawPhp;
+    use Compilers\Concerns\CompilesStacks;
 
     //<editor-fold desc="fields">
     public const VERSION = '4.7.1';
@@ -217,7 +219,7 @@ class View
      *            <b>md5</b> the filename is converted into a md5 hash<br>
      *            <b>normal</b> the filename is left untouched<br>
      */
-    protected string $compileTypeFileName='auto';
+    protected string $compileTypeFileName = 'auto';
 
 
     /** @var array Custom "directive" dictionary. Those directives run at compile time. */
@@ -388,7 +390,9 @@ class View
      */
     public static function e(mixed $value): string
     {
-        // Prevent "Deprecated: htmlentities(): Passing null to parameter #1 ($string) of type string is deprecated" message
+        // Prevent "Deprecated: htmlentities(): 
+        //Passing null to parameter #1 ($string) of type string is deprecated" message
+
         if (is_null($value)) {
             return '';
         }
@@ -439,7 +443,7 @@ class View
      */
     public function wrapPHP($input, $quote = '"', $parse = true): string
     {
-        if($input===null) {
+        if($input === null) {
             return 'null';
         }
         if (strpos($input, '(') !== false && !$this->isQuoted($input)) {
@@ -1295,9 +1299,9 @@ class View
     public function getCompiledFile($templateName = ''): string
     {
         $templateName = (empty($templateName)) ? $this->fileName : $templateName;
-        $style=$this->compileTypeFileName;
-        if ($style==='auto') {
-            $style=($this->getMode() === self::MODE_DEBUG)?'nochange':'sha1';
+        $style = $this->compileTypeFileName;
+        if ($style === 'auto') {
+            $style = ($this->getMode() === self::MODE_DEBUG) ? 'nochange' : 'sha1';
         }
         switch ($style) {
             case 'normal':
@@ -2744,7 +2748,7 @@ class View
      *
      * @return array|string|string[]|null
      */
-    protected function compileStatements($value)
+    protected function compileStatements($val)
     {
         /**
          * @param array $match
@@ -2784,7 +2788,7 @@ class View
             return isset($match[3]) ? $match[0] : $match[0] . $match[2];
         };
         /* return \preg_replace_callback('/\B@(@?\w+)([ \t]*)(\( ( (?>[^()]+) | (?3) )* \))?/x', $callback, $value); */
-        return preg_replace_callback('/\B@(@?\w+(?:::\w+)?)([ \t]*)(\( ( (?>[^()]+) | (?3) )* \))?/x', $callback, $value);
+        return preg_replace_callback('/\B@(@?\w+(?:::\w+)?)([ \t]*)(\( ( (?>[^()]+) | (?3) )* \))?/x', $callback, $val);
     }
 
     /**
@@ -3067,7 +3071,7 @@ class View
             return $result;
         }
         $prev = '';
-        for ($i = 1; $i <=$c; $i++) {
+        for ($i = 1; $i <= $c; $i++) {
             $r = @explode(':', $array[$i], 2);
             $fnName = trim($r[0]);
             $fnNameF = $fnName[0]; // first character
@@ -3078,7 +3082,7 @@ class View
             } elseif (method_exists($this, $fnName)) {
                 $fnName = '$this->' . $fnName;
             }
-            $hasArgument=count($r) === 2;
+            $hasArgument = count($r) === 2;
             if ($i === 1) {
                 $prev = $fnName . '(' . $array[0];
                 if ($hasArgument) {
@@ -3088,9 +3092,9 @@ class View
             } else {
                 $prev = $fnName . '(' . $prev;
                 if ($hasArgument) {
-                    $prev .=', '. $r[1] . ')';
+                    $prev .= ', ' . $r[1] . ')';
                 } else {
-                    $prev.=')';
+                    $prev .= ')';
                 }
             }
         }
@@ -3240,9 +3244,9 @@ class View
         };
     }
 
-    protected function compileAsset($expression): string
+    protected function compileAsset($val): string
     {
-        return $this->phpTagEcho . "(isset(\$this->assetDict[$expression]))?\$this->assetDict[$expression]:\$this->baseUrl.'/'.$expression; ?>";
+        return $this->phpTagEcho . "(isset(\$this->assetDict[$val]))?\$this->assetDict[$val]:\$this->baseUrl.'/'.$val; ?>";
     }
 
     //</editor-fold>
@@ -3339,14 +3343,14 @@ class View
     public function checkHealthPath(): bool
     {
         echo self::colorLog("Checking Health\n");
-        $status=true;
+        $status = true;
         if (is_dir($this->compiledPath)) {
             echo "Compile-path [$this->compiledPath] is a folder " . self::colorLog("OK") . "\n";
         } else {
-            $status=false;
+            $status = false;
             echo "Compile-path [$this->compiledPath] is not a folder " . self::colorLog("ERROR", 'e') . "\n";
         }
-        foreach($this->templatePath as $t) {
+        foreach ($this->templatePath as $t) {
             if (is_dir($t)) {
                 echo "Template-path (view) [$t] is a folder " . self::colorLog("OK") . "\n";
             } else {
@@ -3360,12 +3364,12 @@ class View
             $rnd = $this->compiledPath . '/dummy' . rand(10000, 900009);
             $f = @file_put_contents($rnd, 'dummy');
             if ($f === false) {
-                $status=false;
+                $status = false;
                 $error = self::colorLog("Unable to create file [" . $this->compiledPath . '/dummy]', 'e');
             }
             @unlink($rnd);
         } catch (Exception $ex) {
-            $status=false;
+            $status = false;
             $error = self::colorLog($ex->getMessage(), 'e');
         }
         echo "Testing write in the compile folder [$rnd] $error\n";
@@ -3388,7 +3392,7 @@ class View
         } else {
             echo self::colorLog("Note: folder already exist.\n", 'w');
         }
-        foreach($this->templatePath as $t) {
+        foreach ($this->templatePath as $t) {
             echo "Creating template folder [" . self::colorLog($t, 'b') . "] ";
             if (!is_dir($t)) {
                 $ok = mkdir($t, 0770, true);
