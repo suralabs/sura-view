@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Sura\View\Compilers\Concerns;
-
 
 trait CompilesJson
 {

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Sura\View\Compilers\Concerns;
-
 
 trait CompilesLoops
 {
@@ -250,5 +248,4 @@ trait CompilesLoops
     {
         return $this->phpTag . "while$expression: ?>";
     }
-
 }
