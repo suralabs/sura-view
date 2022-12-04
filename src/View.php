@@ -390,8 +390,8 @@ class View
      */
     public static function e(mixed $value): string
     {
-        // Prevent "Deprecated: htmlentities(): 
-        //Passing null to parameter #1 ($string) of type string is deprecated" message
+        // Prevent "Deprecated: htmlentities():
+        // Passing null to parameter #1 ($string) of type string is deprecated" message
 
         if (is_null($value)) {
             return '';
@@ -443,7 +443,7 @@ class View
      */
     public function wrapPHP($input, $quote = '"', $parse = true): string
     {
-        if($input === null) {
+        if ($input === null) {
             return 'null';
         }
         if (strpos($input, '(') !== false && !$this->isQuoted($input)) {
