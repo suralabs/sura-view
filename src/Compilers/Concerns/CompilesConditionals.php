@@ -117,4 +117,15 @@ trait CompilesConditionals
     {
         return $this->phpTag . 'endif; ?>';
     }
+
+    /**
+     * Compile the endpush statements into valid PHP.
+     *
+     * @return string
+     */
+    protected function compileEndPrepend(): string
+    {
+        return $this->phpTag . '$this->stopPrepend(); ?>';
+    }
+
 }

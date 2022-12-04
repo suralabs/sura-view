@@ -3132,23 +3132,6 @@ class View
     {
         return $this->phpTag . 'endif; ?>';
     }
-    //</editor-fold>
-    //<editor-fold desc="Array Functions">
-
-
-    /**
-     * Compile the {@}compilestamp statement.
-     *
-     * @param string $expression
-     *
-     * @return false|string
-     */
-    protected function compileCompileStamp($expression)
-    {
-        $expression = $this->stripQuotes($this->stripParentheses($expression));
-        $expression = ($expression === '') ? 'Y-m-d H:i:s' : $expression;
-        return date($expression);
-    }
 
     /**
      * compile the {@}viewname statement<br>
@@ -3173,41 +3156,12 @@ class View
         }
     }
 
-    /**
-     * Compile the endpush statements into valid PHP.
-     *
-     * @return string
-     */
-    protected function compileEndPrepend(): string
-    {
-        return $this->phpTag . '$this->stopPrepend(); ?>';
-    }
-
     protected function compileAsset($expression): string
     {
         return $this->phpTagEcho . "(isset(\$this->assetDict[$expression]))?\$this->assetDict[$expression]:\$this->baseUrl.'/'.$expression; ?>";
     }
 
     //</editor-fold>
-
-    // <editor-fold desc='language'>
-
-    protected function compileIsset($expression): string
-    {
-        return $this->phpTag . "if(isset$expression): ?>";
-    }
-
-    protected function compileEndIsset(): string
-    {
-        return $this->phpTag . 'endif; ?>';
-    }
-
-    protected function compileEndEmpty(): string
-    {
-        return $this->phpTag . 'endif; ?>';
-    }
-
-    //<editor-fold desc="compile">
 
     /**
      * Used for @_e directive.
@@ -3445,7 +3399,4 @@ class View
         }
         return $path[1] === ':';
     }
-
-    //</editor-fold>
-
 }

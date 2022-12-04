@@ -21,4 +21,33 @@ trait CompilesHelpers
     {
         return $this->phpTagEcho . "'<pre>'; var_dump$value; echo '</pre>';?>";
     }
+
+    protected function compileIsset($expression): string
+    {
+        return $this->phpTag . "if(isset$expression): ?>";
+    }
+
+    protected function compileEndIsset(): string
+    {
+        return $this->phpTag . 'endif; ?>';
+    }
+
+    protected function compileEndEmpty(): string
+    {
+        return $this->phpTag . 'endif; ?>';
+    }
+    
+    /**
+     * Compile the {@}compilestamp statement.
+     *
+     * @param string $expression
+     *
+     * @return false|string
+     */
+    protected function compileCompileStamp($expression)
+    {
+        $expression = $this->stripQuotes($this->stripParentheses($expression));
+        $expression = ($expression === '') ? 'Y-m-d H:i:s' : $expression;
+        return date($expression);
+    }    
 }
