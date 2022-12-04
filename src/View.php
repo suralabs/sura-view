@@ -17,6 +17,21 @@ use InvalidArgumentException;
  */
 class View
 {
+    use Compilers\Concerns\CompilesAuthorizations,
+        Compilers\Concerns\CompilesComments,
+        Compilers\Concerns\CompilesComponents,
+        Compilers\Concerns\CompilesConditionals,
+        Compilers\Concerns\CompilesEchos,
+        Compilers\Concerns\CompilesErrors,
+        Compilers\Concerns\CompilesHelpers,
+        Compilers\Concerns\CompilesIncludes,
+        Compilers\Concerns\CompilesInjections,
+        Compilers\Concerns\CompilesJson,
+        Compilers\Concerns\CompilesLayouts,
+        Compilers\Concerns\CompilesLoops,
+        Compilers\Concerns\CompilesRawPhp,
+        Compilers\Concerns\CompilesStacks;
+
     //<editor-fold desc="fields">
     public const VERSION = '4.7.1';
     /** @var int View reads if the compiled file has changed. If it has changed,then the file is replaced. */
@@ -28,17 +43,17 @@ class View
     /** @var int DEBUG MODE, the file is always compiled and the filename is identifiable. */
     public const MODE_DEBUG = 5;
     /** @var array Hold dictionary of translations */
-    public static $dictionary = [];
+    public static array $dictionary = [];
     /** @var string PHP tag. You could use < ?php or < ? (if shorttag is active in php.ini) */
-    public $phpTag = '<?php '; // hello hello hello.
+    public string $phpTag = '<?php '; // hello hello hello.
     /** @var string this line is used to easily echo a value */
-    protected $phpTagEcho = '<?php' . ' echo ';
+    protected string $phpTagEcho = '<?php' . ' echo ';
     /** @var string $currentUser Current user. Example: john */
-    public $currentUser;
+    public string $currentUser;
     /** @var string $currentRole Current role. Example: admin */
     public $currentRole;
     /** @var string[] $currentPermission Current permission. Example ['edit', 'add'] */
-    public $currentPermission = [];
+    public array $currentPermission = [];
     /** @var callable callback of validation. It is used for @can,@cannot */
     public $authCallBack;
     /** @var callable callback of validation. It is used for @canany */
@@ -46,15 +61,15 @@ class View
     /** @var callable callback of errors. It is used for @error */
     public $errorCallBack;
     /** @var bool if true then, if the operation fails, and it is critic, then it throws an error */
-    public $throwOnError = false;
+    public bool $throwOnError = false;
     /** @var string security token */
-    public $csrf_token = '';
+    public string $csrf_token = '';
     /** @var string The path to the missing translations log file. If empty then every missing key is not saved. */
-    public $missingLog = '';
+    public string $missingLog = '';
     /** @var bool */
-    public $pipeEnable = false;
+    public bool $pipeEnable = false;
     /** @var array Alias (with or without namespace) of the classes */
-    public $aliasClasses = [];
+    public array $aliasClasses = [];
     /**
      * @var bool if true then the variables defined in the "include" as arguments are scoped to work only
      * inside the include.<br>
@@ -70,7 +85,7 @@ class View
      * @include("template",[]) // a1 is not defined
      * </pre>
      */
-    public $includeScope = false;
+    public bool $includeScope = false;
     /**
      * @var callable[] It allows to parse the compiled output using a function.
      * This function doesn't require to return a value<br>
@@ -83,46 +98,46 @@ class View
      */
     public $compileCallbacks = [];
     /** @var array All the registered extensions. */
-    protected $extensions = [];
+    protected array $extensions = [];
     /** @var array All the finished, captured sections. */
-    protected $sections = [];
+    protected array $sections = [];
     /** @var string The template currently being compiled. For example "folder.template" */
-    protected $fileName;
-    protected $currentView;
-    protected $notFoundPath;
+    protected string $fileName;
+    protected string $currentView;
+    protected string $notFoundPath;
     /** @var string File extension for the template files. */
-    protected $fileExtension = '.blade.php';
+    protected string $fileExtension = '.blade.php';
     /** @var array The stack of in-progress sections. */
-    protected $sectionStack = [];
+    protected array $sectionStack = [];
     /** @var array The stack of in-progress loops. */
-    protected $loopsStack = [];
+    protected array $loopsStack = [];
     /** @var array Dictionary of variables */
-    protected $variables = [];
+    protected array $variables = [];
     /** @var array Dictionary of global variables */
-    protected $variablesGlobal = [];
+    protected array $variablesGlobal = [];
     /** @var array All the available compiler functions. */
-    protected $compilers = [
+    protected array $compilers = [
         'Extensions',
         'Statements',
         'Comments',
         'Echos',
     ];
     /** @var string|null it allows to set the stack */
-    protected $viewStack;
+    protected ?string $viewStack;
     /** @var array used by $this->composer() */
-    protected $composerStack = [];
+    protected array $composerStack = [];
     /** @var array The stack of in-progress push sections. */
-    protected $pushStack = [];
+    protected array $pushStack = [];
     /** @var array All the finished, captured push sections. */
-    protected $pushes = [];
+    protected array $pushes = [];
     /** @var int The number of active rendering operations. */
-    protected $renderCount = 0;
+    protected int $renderCount = 0;
     /** @var string[] Get the template path for the compiled views. */
-    protected $templatePath;
+    protected array $templatePath;
     /** @var string Get the compiled path for the compiled views. If null then it uses the default path */
-    protected $compiledPath;
+    protected string $compiledPath;
     /** @var string the extension of the compiled file. */
-    protected $compileExtension = '.bladec';
+    protected string $compileExtension = '.bladec';
     /**
      * @var string=['auto', 'sha1', 'md5', 'nochange'][$i] It determines how the compiled filename will be called.<br>
      *            <b>auto</b> (default mode) the mode is "sha1" unless the mode is MODE_DEBUG<br>
@@ -130,29 +145,29 @@ class View
      *            <b>md5</b> the filename is converted into a md5 hash<br>
      *            <b>normal</b> the filename is left untouched<br>
      */
-    protected $compileTypeFileName='auto';
+    protected string $compileTypeFileName='auto';
 
 
     /** @var array Custom "directive" dictionary. Those directives run at compile time. */
-    protected $customDirectives = [];
+    protected array $customDirectives = [];
     /** @var bool[] Custom directive dictionary. Those directives run at runtime. */
-    protected $customDirectivesRT = [];
+    protected array $customDirectivesRT = [];
     /** @var callable Function used for resolving injected classes. */
     protected $injectResolver;
     /** @var array Used for conditional if. */
-    protected $conditions = [];
+    protected array $conditions = [];
     /** @var int Unique counter. It's used for extends */
-    protected $uidCounter = 0;
+    protected int $uidCounter = 0;
     /** @var string The main url of the system. Don't use raw $_SERVER values unless the value is sanitized */
-    protected $baseUrl = '.';
+    protected string $baseUrl = '.';
     /** @var string|null The base domain of the system */
-    protected $baseDomain;
+    protected ?string $baseDomain;
     /** @var string|null It stores the current canonical url. */
-    protected $canonicalUrl;
+    protected ?string $canonicalUrl;
     /** @var string|null It stores the current url including arguments */
-    protected $currentUrl;
+    protected ?string $currentUrl;
     /** @var string it is a relative path calculated between baseUrl and the current url. Example ../../ */
-    protected $relativePath = '';
+    protected string $relativePath = '';
     /** @var string[] Dictionary of assets */
     protected $assetDict;
     /** @var bool if true then it removes tabs and unneeded spaces */
@@ -1259,7 +1274,7 @@ class View
     public function getTemplateFile($templateName = ''): string
     {
         $templateName = (empty($templateName)) ? $this->fileName : $templateName;
-        if (\strpos($templateName, '/') !== false) {
+        if (str_contains($templateName, '/')) {
             return $this->locateTemplate($templateName); // it's a literal
         }
         $arr = \explode('.', $templateName);
@@ -2176,7 +2191,7 @@ class View
     /**
      * @param string[] $currentPermission
      */
-    public function setCurrentPermission($currentPermission): void
+    public function setCurrentPermission(array $currentPermission): void
     {
         $this->currentPermission = $currentPermission;
     }
@@ -2218,7 +2233,7 @@ class View
             $this->relativePath = '';
             return $this;
         }
-        if (\strpos($currentUrl, $this->baseUrl) === 0) {
+        if (str_starts_with($currentUrl, $this->baseUrl)) {
             $part = \str_replace($this->baseUrl, '', $currentUrl);
             $numf = \substr_count($part, '/') - 1;
             $numf = ($numf > 10) ? 10 : $numf; // avoid overflow
@@ -2584,7 +2599,7 @@ class View
      * @param mixed $text
      * @return null|string|string[]
      */
-    public function stripQuotes($text)
+    public function stripQuotes($text): array|string|null
     {
         if (!$text || strlen($text) < 2) {
             return $text;
@@ -2674,7 +2689,7 @@ class View
                 // @@escaped tag
                 $match[0] = isset($match[3]) ? $match[1] . $match[3] : $match[1];
             } else {
-                if (strpos($match[1], '::') !== false) {
+                if (str_contains($match[1], '::')) {
                     // Someclass::method
                     return $this->compileStatementClass($match);
                 }
@@ -2710,12 +2725,12 @@ class View
     public static function contains($haystack, $needles): bool
     {
         foreach ((array)$needles as $needle) {
-            if ($needle != '') {
+            if ($needle !== '') {
                 if (\function_exists('mb_strpos')) {
-                    if (\mb_strpos($haystack, $needle) !== false) {
+                    if (\str_contains($haystack, $needle)) {
                         return true;
                     }
-                } elseif (\strpos($haystack, $needle) !== false) {
+                } elseif (str_contains($haystack, $needle)) {
                     return true;
                 }
             }
@@ -2742,9 +2757,9 @@ class View
      * @return string
      * @see \Sura\View\View::$aliasClasses
      */
-    protected function fixNamespaceClass($text): string
+    protected function fixNamespaceClass(string $text): string
     {
-        if (strpos($text, '::') === false) {
+        if (!str_contains($text, '::')) {
             return $text;
         }
         $classPart = explode('::', $text, 2);
@@ -2801,10 +2816,10 @@ class View
      * Determine if the given key exists in the provided array.
      *
      * @param ArrayAccess|array $array
-     * @param string|int        $key
+     * @param int|string $key
      * @return bool
      */
-    public static function exists($array, $key): bool
+    public static function exists(ArrayAccess|array $array, int|string $key): bool
     {
         if ($array instanceof ArrayAccess) {
             return $array->offsetExists($key);
@@ -2817,7 +2832,7 @@ class View
      * @param string $expression
      * @return array
      */
-    protected function getArgs($expression): array
+    protected function getArgs(string $expression): array
     {
         return $this->parseArgs($this->stripParentheses($expression), ' ');
     }
@@ -2865,7 +2880,7 @@ class View
                 // we close the parenthesis.
                 $insidePar = false;
             }
-            if (strpos($stringArr, $char) !== false) { // if ($char === '"' || $char === "'" || $char === "¬") {
+            if (str_contains($stringArr, $char)) { // if ($char === '"' || $char === "'" || $char === "¬") {
                 // we found a string initializer
                 $inext = strpos($text, $char, $i + 1);
                 $inext = $inext === false ? $strL : $inext;
@@ -2897,7 +2912,7 @@ class View
             $part = trim($part);
             if ($part) {
                 $char = $part[0];
-                if (strpos($stringArr, $char) !== false) { // if ($char === '"' || $char === "'" || $char === "¬") {
+                if (str_contains($stringArr, $char)) { // if ($char === '"' || $char === "'" || $char === "¬") {
                     if ($emptyKey) {
                         $result[$part] = null;
                     } else {
@@ -2972,7 +2987,7 @@ class View
      * @return string
      * @\Sura\View\View::$pipeEnable
      */
-    protected function pipeDream($result): string
+    protected function pipeDream(string $result): string
     {
         $array = preg_split('~\\\\.(*SKIP)(*FAIL)|\|~s', $result);
         $c = count($array) - 1; // base zero.
@@ -3017,7 +3032,7 @@ class View
      * @param string $expression
      * @return string
      */
-    protected function compileEach($expression): string
+    protected function compileEach(string $expression): string
     {
         return $this->phpTagEcho . "\$this->renderEach$expression; ?>";
     }
@@ -3036,7 +3051,7 @@ class View
      * @param string $expression
      * @return string
      */
-    protected function compileYield($expression): string
+    protected function compileYield(string $expression): string
     {
         return $this->phpTagEcho . "\$this->yieldContent$expression; ?>";
     }
@@ -3057,7 +3072,7 @@ class View
      * @param string $expression
      * @return string
      */
-    protected function compileSection($expression): string
+    protected function compileSection(string $expression): string
     {
         return $this->phpTag . "\$this->startSection$expression; ?>";
     }
@@ -3108,7 +3123,7 @@ class View
      * @param string $expression
      * @return string
      */
-    protected function compileUnless($expression): string
+    protected function compileUnless(string $expression): string
     {
         return $this->phpTag . "if ( ! $expression): ?>";
     }
@@ -3143,17 +3158,14 @@ class View
      *
      * @return string
      */
-    protected function compileViewName($expression): string
+    protected function compileViewName(mixed $expression): string
     {
         $expression = $this->stripQuotes($this->stripParentheses($expression));
-        switch ($expression) {
-            case 'compiled':
-                return $this->getCompiledFile($this->fileName);
-            case 'template':
-                return $this->getTemplateFile($this->fileName);
-            default:
-                return $this->fileName;
-        }
+        return match ($expression) {
+            'compiled' => $this->getCompiledFile($this->fileName),
+            'template' => $this->getTemplateFile($this->fileName),
+            default => $this->fileName,
+        };
     }
 
     protected function compileAsset($expression): string
@@ -3212,12 +3224,12 @@ class View
 
     /**
      * @param           $key
-     * @param string    $default  is the defalut value is the parameter is set
+     * @param string $default  is the defalut value is the parameter is set
      *                            without value.
-     * @param bool      $set      it is the value returned when the argument is set but there is no value assigned
+     * @param bool $set      it is the value returned when the argument is set but there is no value assigned
      * @return string
      */
-    public static function getParameterCli($key, $default = '', $set = true)
+    public static function getParameterCli($key, string $default = '', bool $set = true): bool|string
     {
         global $argv;
         $p = array_search('-' . $key, $argv, true);
@@ -3240,22 +3252,16 @@ class View
      * @param string $type =['i', 'e', 's', 'w'][$i]
      * @return string
      */
-    public static function colorLog($str, $type = 'i'): string
+    public static function colorLog(string $str, string $type = 'i'): string
     {
-        switch ($type) {
-            case 'e': //error
-                return "\033[31m$str\033[0m";
-            case 's': //success
-                return "\033[32m$str\033[0m";
-            case 'w': //warning
-                return "\033[33m$str\033[0m";
-            case 'i': //info
-                return "\033[36m$str\033[0m";
-            case 'b':
-                return "\e[01m$str\e[22m";
-            default:
-                return $str;
-        }
+        return match ($type) {
+            'e' => "\033[31m$str\033[0m",
+            's' => "\033[32m$str\033[0m",
+            'w' => "\033[33m$str\033[0m",
+            'i' => "\033[36m$str\033[0m",
+            'b' => "\e[01m$str\e[22m",
+            default => $str,
+        };
     }
 
     public function checkHealthPath(): bool
@@ -3344,49 +3350,6 @@ class View
         }
         echo "Files deleted $count\n";
         return $count;
-    }
-
-    public function cliEngine(): void
-    {
-        $clearcompile = self::getParameterCli('clearcompile');
-        $createfolder = self::getParameterCli('createfolder');
-        $check = self::getParameterCli('check');
-        echo '  ____  _           _       ____             ' . "\n";
-        echo ' |  _ \| |         | |     / __ \            ' . "\n";
-        echo ' | |_) | | __ _  __| | ___| |  | |_ __   ___ ' . "\n";
-        echo ' |  _ <| |/ _` |/ _` |/ _ \ |  | | \'_ \ / _ \\' . "\n";
-        echo ' | |_) | | (_| | (_| |  __/ |__| | | | |  __/' . "\n";
-        echo ' |____/|_|\__,_|\__,_|\___|\____/|_| |_|\___|' . " V." . self::VERSION . "\n\n";
-        echo "\n";
-        $done = false;
-        if ($check) {
-            $done = true;
-            $this->checkHealthPath();
-        }
-        if ($clearcompile) {
-            $done = true;
-            $this->clearcompile();
-        }
-        if($createfolder) {
-            $done=true;
-            $this->createFolders();
-        }
-        if (!$done) {
-            echo " Syntax:\n";
-            echo " " . self::colorLog("-templatepath", "b") 
-            . " <templatepath> (optional) the template-path (view path).\n";
-            echo "    Default value: 'views'\n";
-            echo "    Example: 'php /vendor/bin/suraviewcli /folder/views' (absolute)\n";
-            echo "    Example: 'php /vendor/bin/suraviewcli folder/view1' (relative)\n";
-            echo " " . self::colorLog("-compilepath", "b")  . " <compilepath>  (optional) the compile-path.\n";
-            echo "    Default value: 'compiles'\n";
-            echo "    Example: 'php /vendor/bin/suraviewcli /folder/compiles' (absolute)\n";
-            echo "    Example: 'php /vendor/bin/suraviewcli compiles' (relative)\n";
-            echo " " . self::colorLog("-createfolder", "b") . " it creates the folders if they don't exist.\n";
-            echo "    Example: php ./vendor/bin/suraviewcli -createfolder\n";
-            echo " " . self::colorLog("-clearcompile", "b") . " It deletes the content of the compile path\n";
-            echo " " . self::colorLog("-check", "b") . " It checks the folders and permissions\n";
-        }
     }
 
     public static function isAbsolutePath($path): bool
