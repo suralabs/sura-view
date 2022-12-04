@@ -48,7 +48,8 @@ trait CompilesIncludes
      */
     protected function compileIncludeIf($expression): string
     {
-        return $this->phpTag . 'if ($this->templateExist' . $expression . ') echo $this->runChild' . $expression . '; ?>';
+        return $this->phpTag . 
+        'if ($this->templateExist' . $expression . ') echo $this->runChild' . $expression . '; ?>';
     }
 
     /**
