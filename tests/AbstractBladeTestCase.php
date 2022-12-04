@@ -27,7 +27,10 @@ abstract class AbstractBladeTestCase extends TestCase
     }
     */
 
-    public function assertEqualsIgnoringWhitespace($expected, $actual, $message = '', $delta = 0.0, $maxDepth = 10, $canonicalize = false, $ignoreCase = false)
+    public function assertEqualsIgnoringWhitespace(
+        $expected, 
+        $actual, 
+        $message = '')
     {
         $this->assertEquals(
             preg_replace('/\s/', '', $expected),
