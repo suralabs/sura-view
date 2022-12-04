@@ -11,15 +11,8 @@ categories:
   - title: '🚀  Features'
     labels:
       - 'feature'
-      - 'type:helper'
-      - 'type:classes'
-      - 'type:modules'
-      - 'type:admin'
-      - 'type:templates'
-      - 'type:services'
       - 'type:interfaces'
       - 'type:major'
-      - 'type:models'
   - title: '🐛 Bug Fixes'
     labels:
       - 'fix'
@@ -48,11 +41,6 @@ version-resolver:
       - feature
       - minor
       - 'type:helper'
-      - 'type:modules'
-      - 'type:admin'
-      - 'type:services'
-      - 'type:interfaces'
-      - 'type:models'
       - dependencies
   patch:
     labels:
@@ -63,6 +51,8 @@ version-resolver:
       - hotfix
       - fix
       - theme:docs
-      - type:templates
+      - type:compilers
+      - type:traits
+      - type:tests
       - analysis
   default: patch

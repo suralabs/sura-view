@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Sura\View;
@@ -7,32 +8,103 @@ use ArrayAccess;
 use BadMethodCallException;
 use Closure;
 use Countable;
+use DateTime;
 use Exception;
 use InvalidArgumentException;
+use ParseError;
+use ReflectionException;
+use ReflectionMethod;
+use RuntimeException;
+
+use function array_key_exists;
+use function array_keys;
+use function array_map;
+use function array_merge;
+use function array_pop;
+use function array_reverse;
+use function array_shift;
+use function array_splice;
+use function array_unshift;
+use function bin2hex;
+use function call_user_func;
+use function count;
+use function defined;
+use function end;
+use function error_get_last;
+use function explode;
+use function extract;
+use function fclose;
+use function file_get_contents;
+use function file_put_contents;
+use function filemtime;
+use function filesize;
+use function fopen;
+use function func_get_args;
+use function function_exists;
+use function fwrite;
+use function getcwd;
+use function htmlentities;
+use function implode;
+use function in_array;
+use function is_array;
+use function is_file;
+use function is_null;
+use function is_numeric;
+use function is_object;
+use function json_encode;
+use function ltrim;
+use function mb_strpos;
+use function md5;
+use function method_exists;
+use function mkdir;
+use function ob_end_clean;
+use function ob_get_clean;
+use function ob_get_level;
+use function ob_start;
+use function preg_match;
+use function preg_quote;
+use function preg_replace;
+use function preg_replace_callback;
+use function print_r;
+use function random_bytes;
+use function reset;
+use function rtrim;
+use function sha1;
+use function str_contains;
+use function str_repeat;
+use function str_replace;
+use function stripcslashes;
+use function strlen;
+use function strpos;
+use function substr;
+use function substr_count;
+use function token_get_all;
+use function trim;
+use function ucfirst;
+use function uksort;
+use function var_dump;
 
 /**
  * View - A View Template implementation
  * @since 1.0
- * @version   1.0
  */
 class View
 {
+    use Compilers\Concerns\CompilesAuthorizations;
+    use Compilers\Concerns\CompilesComments;
+    use Compilers\Concerns\CompilesComponents;
+    use Compilers\Concerns\CompilesConditionals;
+    use Compilers\Concerns\CompilesEchos;
+    use Compilers\Concerns\CompilesErrors;
+    use Compilers\Concerns\CompilesHelpers;
+    use Compilers\Concerns\CompilesIncludes;
+    use Compilers\Concerns\CompilesInjections;
+    use Compilers\Concerns\CompilesJson;
+    use Compilers\Concerns\CompilesLayouts;
+    use Compilers\Concerns\CompilesLoops;
+    use Compilers\Concerns\CompilesRawPhp;
+    use Compilers\Concerns\CompilesStacks;
 
-    use Compilers\Concerns\CompilesAuthorizations,
-    Compilers\Concerns\CompilesComments,
-    Compilers\Concerns\CompilesComponents,
-    Compilers\Concerns\CompilesConditionals,
-    Compilers\Concerns\CompilesEchos,
-    Compilers\Concerns\CompilesErrors,
-    Compilers\Concerns\CompilesHelpers,
-    Compilers\Concerns\CompilesIncludes,
-    Compilers\Concerns\CompilesInjections,
-    Compilers\Concerns\CompilesJson,
-    Compilers\Concerns\CompilesLayouts,
-    Compilers\Concerns\CompilesLoops,
-    Compilers\Concerns\CompilesRawPhp,
-    Compilers\Concerns\CompilesStacks;
-    
     //<editor-fold desc="fields">
     public const VERSION = '4.7.1';
     /** @var int View reads if the compiled file has changed. If it has changed,then the file is replaced. */
@@ -44,17 +116,17 @@ class View
     /** @var int DEBUG MODE, the file is always compiled and the filename is identifiable. */
     public const MODE_DEBUG = 5;
     /** @var array Hold dictionary of translations */
-    public static $dictionary = [];
+    public static array $dictionary = [];
     /** @var string PHP tag. You could use < ?php or < ? (if shorttag is active in php.ini) */
-    public $phpTag = '<?php '; // hello hello hello.
+    public string $phpTag = '<?php '; // hello hello hello.
     /** @var string this line is used to easily echo a value */
-    protected $phpTagEcho = '<?php' . ' echo ';
+    protected string $phpTagEcho = '<?php' . ' echo ';
     /** @var string $currentUser Current user. Example: john */
-    public $currentUser;
+    public string $currentUser;
     /** @var string $currentRole Current role. Example: admin */
     public $currentRole;
-    /** @var string[] $currentPermission Current permission. Example ['edit','add'] */
-    public $currentPermission = [];
+    /** @var string[] $currentPermission Current permission. Example ['edit', 'add'] */
+    public array $currentPermission = [];
     /** @var callable callback of validation. It is used for @can,@cannot */
     public $authCallBack;
     /** @var callable callback of validation. It is used for @canany */
@@ -62,15 +134,15 @@ class View
     /** @var callable callback of errors. It is used for @error */
     public $errorCallBack;
     /** @var bool if true then, if the operation fails, and it is critic, then it throws an error */
-    public $throwOnError = false;
+    public bool $throwOnError = false;
     /** @var string security token */
-    public $csrf_token = '';
+    public string $csrf_token = '';
     /** @var string The path to the missing translations log file. If empty then every missing key is not saved. */
-    public $missingLog = '';
+    public string $missingLog = '';
     /** @var bool */
-    public $pipeEnable = false;
+    public bool $pipeEnable = false;
     /** @var array Alias (with or without namespace) of the classes */
-    public $aliasClasses = [];
+    public array $aliasClasses = [];
     /**
      * @var bool if true then the variables defined in the "include" as arguments are scoped to work only
      * inside the include.<br>
@@ -86,7 +158,7 @@ class View
      * @include("template",[]) // a1 is not defined
      * </pre>
      */
-    public $includeScope = false;
+    public bool $includeScope = false;
     /**
      * @var callable[] It allows to parse the compiled output using a function.
      * This function doesn't require to return a value<br>
@@ -99,76 +171,76 @@ class View
      */
     public $compileCallbacks = [];
     /** @var array All the registered extensions. */
-    protected $extensions = [];
+    protected array $extensions = [];
     /** @var array All the finished, captured sections. */
-    protected $sections = [];
+    protected array $sections = [];
     /** @var string The template currently being compiled. For example "folder.template" */
-    protected $fileName;
-    protected $currentView;
-    protected $notFoundPath;
+    protected string $fileName;
+    protected string $currentView;
+    protected string $notFoundPath;
     /** @var string File extension for the template files. */
-    protected $fileExtension = '.blade.php';
+    protected string $fileExtension = '.blade.php';
     /** @var array The stack of in-progress sections. */
-    protected $sectionStack = [];
+    protected array $sectionStack = [];
     /** @var array The stack of in-progress loops. */
-    protected $loopsStack = [];
+    protected array $loopsStack = [];
     /** @var array Dictionary of variables */
-    protected $variables = [];
+    protected array $variables = [];
     /** @var array Dictionary of global variables */
-    protected $variablesGlobal = [];
+    protected array $variablesGlobal = [];
     /** @var array All the available compiler functions. */
-    protected $compilers = [
+    protected array $compilers = [
         'Extensions',
         'Statements',
         'Comments',
         'Echos',
     ];
     /** @var string|null it allows to set the stack */
-    protected $viewStack;
+    protected ?string $viewStack;
     /** @var array used by $this->composer() */
-    protected $composerStack = [];
+    protected array $composerStack = [];
     /** @var array The stack of in-progress push sections. */
-    protected $pushStack = [];
+    protected array $pushStack = [];
     /** @var array All the finished, captured push sections. */
-    protected $pushes = [];
+    protected array $pushes = [];
     /** @var int The number of active rendering operations. */
-    protected $renderCount = 0;
+    protected int $renderCount = 0;
     /** @var string[] Get the template path for the compiled views. */
-    protected $templatePath;
+    protected array $templatePath;
     /** @var string Get the compiled path for the compiled views. If null then it uses the default path */
-    protected $compiledPath;
+    protected string $compiledPath;
     /** @var string the extension of the compiled file. */
-    protected $compileExtension = '.bladec';
+    protected string $compileExtension = '.bladec';
     /**
-     * @var string=['auto','sha1','md5','nochange'][$i] It determines how the compiled filename will be called.<br>
+     * @var string=['auto', 'sha1', 'md5', 'nochange'][$i] It determines how the compiled filename will be called.<br>
      *            <b>auto</b> (default mode) the mode is "sha1" unless the mode is MODE_DEBUG<br>
      *            <b>sha1</b> the filename is converted into a sha1 hash<br>
      *            <b>md5</b> the filename is converted into a md5 hash<br>
      *            <b>normal</b> the filename is left untouched<br>
      */
-    protected $compileTypeFileName='auto';
+    protected string $compileTypeFileName = 'auto';
 
 
     /** @var array Custom "directive" dictionary. Those directives run at compile time. */
-    protected $customDirectives = [];
+    protected array $customDirectives = [];
     /** @var bool[] Custom directive dictionary. Those directives run at runtime. */
-    protected $customDirectivesRT = [];
+    protected array $customDirectivesRT = [];
     /** @var callable Function used for resolving injected classes. */
     protected $injectResolver;
     /** @var array Used for conditional if. */
-    protected $conditions = [];
+    protected array $conditions = [];
     /** @var int Unique counter. It's used for extends */
-    protected $uidCounter = 0;
+    protected int $uidCounter = 0;
     /** @var string The main url of the system. Don't use raw $_SERVER values unless the value is sanitized */
-    protected $baseUrl = '.';
+    protected string $baseUrl = '.';
     /** @var string|null The base domain of the system */
-    protected $baseDomain;
+    protected ?string $baseDomain;
     /** @var string|null It stores the current canonical url. */
-    protected $canonicalUrl;
+    protected ?string $canonicalUrl;
     /** @var string|null It stores the current url including arguments */
-    protected $currentUrl;
+    protected ?string $currentUrl;
     /** @var string it is a relative path calculated between baseUrl and the current url. Example ../../ */
-    protected $relativePath = '';
+    protected string $relativePath = '';
     /** @var string[] Dictionary of assets */
     protected $assetDict;
     /** @var bool if true then it removes tabs and unneeded spaces */
@@ -232,10 +304,10 @@ class View
     public function __construct($templatePath = null, $compiledPath = null, $mode = 0)
     {
         if ($templatePath === null) {
-            $templatePath = \getcwd() . '/views';
+            $templatePath = getcwd() . '/views';
         }
         if ($compiledPath === null) {
-            $compiledPath = \getcwd() . '/compiles';
+            $compiledPath = getcwd() . '/compiles';
         }
         $this->templatePath = (is_array($templatePath)) ? $templatePath : [$templatePath];
         $this->compiledPath = $compiledPath;
@@ -245,12 +317,12 @@ class View
             /** @noinspection PhpUnusedParameterInspection */
             $subject = null
         ) {
-            return \in_array($action, $this->currentPermission, true);
+            return in_array($action, $this->currentPermission, true);
         };
 
         $this->authAnyCallBack = function ($array = []) {
             foreach ($array as $permission) {
-                if (\in_array($permission, $this->currentPermission ?? [], true)) {
+                if (in_array($permission, $this->currentPermission ?? [], true)) {
                     return true;
                 }
             }
@@ -285,18 +357,18 @@ class View
     /**
      * Show an error in the web.
      *
-     * @param string $id          Title of the error
-     * @param string $text        Message of the error
-     * @param bool   $critic      if true then the compilation is ended, otherwise it continues
-     * @param bool   $alwaysThrow if true then it always throws a runtime exception.
+     * @param string $id Title of the error
+     * @param string $text Message of the error
+     * @param bool $critic if true then the compilation is ended, otherwise it continues
+     * @param bool $alwaysThrow if true then it always throws a runtime exception.
      * @return string
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function showError($id, $text, $critic = false, $alwaysThrow = false): string
     {
-        \ob_get_clean();
+        ob_get_clean();
         if ($this->throwOnError || $alwaysThrow || $critic === true) {
-            throw new \RuntimeException("View Error [$id] $text");
+            throw new RuntimeException("View Error [$id] $text");
         }
 
         $msg = "<div style='background-color: red; color: black; padding: 3px; border: solid 1px black;'>";
@@ -315,19 +387,21 @@ class View
      * @param int|string|null $value
      * @return string
      */
-    public static function e($value): string
+    public static function e(mixed $value): string
     {
-        // Prevent "Deprecated: htmlentities(): Passing null to parameter #1 ($string) of type string is deprecated" message
-        if (\is_null($value)) {
+        // Prevent "Deprecated: htmlentities():
+        // Passing null to parameter #1 ($string) of type string is deprecated" message
+
+        if (is_null($value)) {
             return '';
         }
-        if (\is_array($value) || \is_object($value)) {
-            return \htmlentities(\print_r($value, true), ENT_QUOTES, 'UTF-8', false);
+        if (is_array($value) || is_object($value)) {
+            return htmlentities(print_r($value, true), ENT_QUOTES, 'UTF-8', false);
         }
-        if (\is_numeric($value)) {
-            $value=(string)$value;
+        if (is_numeric($value)) {
+            $value = (string)$value;
         }
-        return \htmlentities($value, ENT_QUOTES, 'UTF-8', false);
+        return htmlentities($value, ENT_QUOTES, 'UTF-8', false);
     }
 
     protected static function convertArgCallBack($k, $v): string
@@ -336,13 +410,13 @@ class View
     }
 
     /**
-     * @param mixed|\DateTime $variable
-     * @param string|null     $format
+     * @param mixed|DateTime $variable
+     * @param string|null $format
      * @return string
      */
     public function format($variable, $format = null): string
     {
-        if ($variable instanceof \DateTime) {
+        if ($variable instanceof DateTime) {
             $format = $format ?? 'Y/m/d';
             return $variable->format($format);
         }
@@ -355,8 +429,8 @@ class View
      * <b>Example:</b><br>
      * <pre>
      * $this->wrapPHP('$hello'); // "< ?php echo $this->e($hello); ? >"
-     * $this->wrapPHP('$hello',''); // < ?php echo $this->e($hello); ? >
-     * $this->wrapPHP('$hello','',false); // < ?php echo $hello; ? >
+     * $this->wrapPHP('$hello', ''); // < ?php echo $this->e($hello); ? >
+     * $this->wrapPHP('$hello', '',false); // < ?php echo $hello; ? >
      * $this->wrapPHP('"hello"'); // "< ?php echo $this->e("hello"); ? >"
      * $this->wrapPHP('hello()'); // "< ?php echo $this->e(hello()); ? >"
      * </pre>
@@ -368,7 +442,7 @@ class View
      */
     public function wrapPHP($input, $quote = '"', $parse = true): string
     {
-        if($input===null) {
+        if ($input === null) {
             return 'null';
         }
         if (strpos($input, '(') !== false && !$this->isQuoted($input)) {
@@ -414,23 +488,23 @@ class View
      * @param string $value
      * @return string
      */
-    public static function enq($value): string
+    public static function enq(mixed $value): string
     {
-        if (\is_array($value) || \is_object($value)) {
-            return \htmlentities(\print_r($value, true), ENT_NOQUOTES, 'UTF-8', false);
+        if (is_array($value) || is_object($value)) {
+            return htmlentities(print_r($value, true), ENT_NOQUOTES, 'UTF-8', false);
         }
-        return \htmlentities($value??'', ENT_NOQUOTES, 'UTF-8', false);
+        return htmlentities($value ?? '', ENT_NOQUOTES, 'UTF-8', false);
     }
 
     /**
      * @param string      $view  example "folder.template"
      * @param string|null $alias example "mynewop". If null then it uses the name of the template.
      */
-    public function addInclude($view, $alias = null): void
+    public function addInclude(string $view, string|null|array|object $alias = null): void
     {
         if (!isset($alias)) {
-            $alias = \explode('.', $view);
-            $alias = \end($alias);
+            $alias = explode('.', $view);
+            $alias = end($alias);
         }
         $this->directive($alias, function ($expression) use ($view) {
             $expression = $this->stripParentheses($expression) ?: '[]';
@@ -459,12 +533,12 @@ class View
      */
     public function stripParentheses($expression): string
     {
-        if (\is_null($expression)) {
+        if (is_null($expression)) {
             return '';
         }
 
         if (static::startsWith($expression, '(')) {
-            $expression = \substr($expression, 1, -1);
+            $expression = substr($expression, 1, -1);
         }
 
         return $expression;
@@ -481,11 +555,11 @@ class View
     {
         foreach ((array)$needles as $needle) {
             if ($needle != '') {
-                if (\function_exists('mb_strpos')) {
-                    if ($haystack !== null && \mb_strpos($haystack, $needle) === 0) {
+                if (function_exists('mb_strpos')) {
+                    if ($haystack !== null && mb_strpos($haystack, $needle) === 0) {
                         return true;
                     }
-                } elseif ($haystack !== null && \strpos($haystack, $needle) === 0) {
+                } elseif ($haystack !== null && strpos($haystack, $needle) === 0) {
                     return true;
                 }
             }
@@ -522,10 +596,10 @@ class View
     public function setPath($templatePath, $compiledPath): void
     {
         if ($templatePath === null) {
-            $templatePath = \getcwd() . '/views';
+            $templatePath = getcwd() . '/views';
         }
         if ($compiledPath === null) {
-            $compiledPath = \getcwd() . '/compiles';
+            $compiledPath = getcwd() . '/compiles';
         }
         $this->templatePath = (is_array($templatePath)) ? $templatePath : [$templatePath];
         $this->compiledPath = $compiledPath;
@@ -584,37 +658,37 @@ class View
     {
         $php = $this->compileString($string);
 
-        $obLevel = \ob_get_level();
-        \ob_start();
-        \extract($data, EXTR_SKIP);
+        $obLevel = ob_get_level();
+        ob_start();
+        extract($data, EXTR_SKIP);
 
-        $previousError = \error_get_last();
+        $previousError = error_get_last();
 
         try {
             @eval('?' . '>' . $php);
         } catch (Exception $e) {
-            while (\ob_get_level() > $obLevel) {
-                \ob_end_clean();
+            while (ob_get_level() > $obLevel) {
+                ob_end_clean();
             }
             throw $e;
-        } catch (\ParseError $e) { // PHP >= 7
-            while (\ob_get_level() > $obLevel) {
-                \ob_end_clean();
+        } catch (ParseError $e) { // PHP >= 7
+            while (ob_get_level() > $obLevel) {
+                ob_end_clean();
             }
             $this->showError('runString', $e->getMessage() . ' ' . $e->getCode(), true);
             return '';
         }
 
-        $lastError = \error_get_last(); // PHP 5.6
+        $lastError = error_get_last(); // PHP 5.6
         if ($previousError != $lastError && $lastError['type'] == E_PARSE) {
-            while (\ob_get_level() > $obLevel) {
-                \ob_end_clean();
+            while (ob_get_level() > $obLevel) {
+                ob_end_clean();
             }
             $this->showError('runString', $lastError['message'] . ' ' . $lastError['type'], true);
             return '';
         }
 
-        return \ob_get_clean();
+        return ob_get_clean();
     }
 
     /**
@@ -626,15 +700,15 @@ class View
     public function compileString($value): string
     {
         $result = '';
-        if (\strpos($value, '@verbatim') !== false) {
+        if (strpos($value, '@verbatim') !== false) {
             $value = $this->storeVerbatimBlocks($value);
         }
         $this->footer = [];
         // Here we will loop through all the tokens returned by the Zend lexer and
         // parse each one into the corresponding valid PHP. We will then have this
         // template as the correctly rendered PHP that can be rendered natively.
-        foreach (\token_get_all($value) as $token) {
-            $result .= \is_array($token) ? $this->parseToken($token) : $token;
+        foreach (token_get_all($value) as $token) {
+            $result .= is_array($token) ? $this->parseToken($token) : $token;
         }
         if (!empty($this->verbatimBlocks)) {
             $result = $this->restoreVerbatimBlocks($result);
@@ -642,9 +716,9 @@ class View
         // If there are any footer lines that need to get added to a template we will
         // add them here at the end of the template. This gets used mainly for the
         // template inheritance via the extends keyword that should be appended.
-        if (\count($this->footer) > 0) {
-            $result = \ltrim($result, PHP_EOL)
-                . PHP_EOL . \implode(PHP_EOL, \array_reverse($this->footer));
+        if (count($this->footer) > 0) {
+            $result = ltrim($result, PHP_EOL)
+                . PHP_EOL . implode(PHP_EOL, array_reverse($this->footer));
         }
         return $result;
     }
@@ -657,7 +731,7 @@ class View
      */
     protected function storeVerbatimBlocks($value): string
     {
-        return \preg_replace_callback('/(?<!@)@verbatim(.*?)@endverbatim/s', function ($matches) {
+        return preg_replace_callback('/(?<!@)@verbatim(.*?)@endverbatim/s', function ($matches) {
             $this->verbatimBlocks[] = $matches[1];
             return $this->verbatimPlaceholder;
         }, $value);
@@ -694,8 +768,8 @@ class View
      */
     protected function restoreVerbatimBlocks($result): string
     {
-        $result = \preg_replace_callback('/' . \preg_quote($this->verbatimPlaceholder) . '/', function () {
-            return \array_shift($this->verbatimBlocks);
+        $result = preg_replace_callback('/' . preg_quote($this->verbatimPlaceholder) . '/', function () {
+            return array_shift($this->verbatimBlocks);
         }, $result);
         $this->verbatimBlocks = [];
         return $result;
@@ -715,19 +789,19 @@ class View
 
     /**
      * It adds an alias to the link of the resources.<br>
-     * addAssetDict('name','url/res.jpg')<br>
-     * addAssetDict(['name'=>'url/res.jpg','name2'=>'url/res2.jpg']);
+     * addAssetDict('name', 'url/res.jpg')<br>
+     * addAssetDict(['name'=>'url/res.jpg', 'name2'=>'url/res2.jpg']);
      *
      * @param string|array $name example 'css/style.css', you could also add an array
      * @param string       $url  example https://www.web.com/style.css'
      */
     public function addAssetDict($name, $url = ''): void
     {
-        if (\is_array($name)) {
+        if (is_array($name)) {
             if ($this->assetDict === null) {
                 $this->assetDict = $name;
             } else {
-                $this->assetDict = \array_merge($this->assetDict, $name);
+                $this->assetDict = array_merge($this->assetDict, $name);
             }
         } else {
             $this->assetDict[$name] = $url;
@@ -744,7 +818,7 @@ class View
     public function startPush($section, $content = ''): void
     {
         if ($content === '') {
-            if (\ob_start()) {
+            if (ob_start()) {
                 $this->pushStack[] = $section;
             }
         } else {
@@ -785,8 +859,8 @@ class View
     public function startPrepend($section, $content = ''): void
     {
         if ($content === '') {
-            if (\ob_start()) {
-                \array_unshift($this->pushStack[], $section);
+            if (ob_start()) {
+                array_unshift($this->pushStack[], $section);
             }
         } else {
             $this->extendPush($section, $content);
@@ -803,8 +877,8 @@ class View
         if (empty($this->pushStack)) {
             $this->showError('stopPush', 'Cannot end a section without first starting one', true);
         }
-        $last = \array_pop($this->pushStack);
-        $this->extendPush($last, \ob_get_clean());
+        $last = array_pop($this->pushStack);
+        $this->extendPush($last, ob_get_clean());
         return $last;
     }
 
@@ -818,8 +892,8 @@ class View
         if (empty($this->pushStack)) {
             $this->showError('stopPrepend', 'Cannot end a section without first starting one', true);
         }
-        $last = \array_shift($this->pushStack);
-        $this->extendStartPush($last, \ob_get_clean());
+        $last = array_shift($this->pushStack);
+        $this->extendStartPush($last, ob_get_clean());
         return $last;
     }
 
@@ -854,7 +928,7 @@ class View
         if (!isset($this->pushes[$section])) {
             return $default;
         }
-        return \implode(\array_reverse($this->pushes[$section]));
+        return implode(array_reverse($this->pushes[$section]));
     }
 
     /**
@@ -866,7 +940,7 @@ class View
      * @param string     $splitEnd
      * @return string
      */
-    public function splitForeach($each = 1, $splitText = ',', $splitEnd = ''): string
+    public function splitForeach($each = 1, $splitText = ', ', $splitEnd = ''): string
     {
         $loopStack = static::last($this->loopsStack); // array(7) { ["index"]=> int(0) ["remaining"]=> int(6) ["count"]=> int(5) ["first"]=> bool(true) ["last"]=> bool(false) ["depth"]=> int(1) ["parent"]=> NULL }
         if (($loopStack['index']) == $loopStack['count'] - 1) {
@@ -899,10 +973,10 @@ class View
      */
     public static function last($array, callable $callback = null, $default = null)
     {
-        if (\is_null($callback)) {
-            return empty($array) ? static::value($default) : \end($array);
+        if (is_null($callback)) {
+            return empty($array) ? static::value($default) : end($array);
         }
-        return static::first(\array_reverse($array), $callback, $default);
+        return static::first(array_reverse($array), $callback, $default);
     }
 
     /**
@@ -926,8 +1000,8 @@ class View
      */
     public static function first($array, callable $callback = null, $default = null)
     {
-        if (\is_null($callback)) {
-            return empty($array) ? static::value($default) : \reset($array);
+        if (is_null($callback)) {
+            return empty($array) ? static::value($default) : reset($array);
         }
         foreach ($array as $key => $value) {
             if ($callback($key, $value)) {
@@ -992,7 +1066,7 @@ class View
      */
     public function check($name, ...$parameters): bool
     {
-        return \call_user_func($this->conditions[$name], ...$parameters);
+        return call_user_func($this->conditions[$name], ...$parameters);
     }
 
     /**
@@ -1020,13 +1094,13 @@ class View
      */
     public function runChild($view, $variables = []): string
     {
-        if (\is_array($variables)) {
+        if (is_array($variables)) {
             if ($this->includeScope) {
                 $backup = $this->variables;
             } else {
                 $backup = null;
             }
-            $newVariables = \array_merge($this->variables, $variables);
+            $newVariables = array_merge($this->variables, $variables);
         } else {
             if ($variables === null) {
                 $newVariables = $this->variables;
@@ -1060,11 +1134,11 @@ class View
     protected function runInternal($view, $variables = [], $forced = false, $isParent = true, $runFast = false): string
     {
         $this->currentView = $view;
-        if (@\count($this->composerStack)) {
+        if (@count($this->composerStack)) {
             $this->evalComposer($view);
         }
-        if (@\count($this->variablesGlobal) > 0) {
-            $this->variables = \array_merge($variables, $this->variablesGlobal);
+        if (@count($this->variablesGlobal) > 0) {
+            $this->variables = array_merge($variables, $this->variablesGlobal);
             //$this->variablesGlobal = []; // used so we delete it.
         } else {
             $this->variables = $variables;
@@ -1122,11 +1196,11 @@ class View
      * The wildcards only works at the beginning and/or at the end of the string.<br>
      * <b>Example:<b><br>
      * <pre>
-     * Text::wildCardComparison('abcdef','abc*'); // true
-     * Text::wildCardComparison('abcdef','*def'); // true
-     * Text::wildCardComparison('abcdef','*abc*'); // true
-     * Text::wildCardComparison('abcdef','*cde*'); // true
-     * Text::wildCardComparison('abcdef','*cde'); // false
+     * Text::wildCardComparison('abcdef', 'abc*'); // true
+     * Text::wildCardComparison('abcdef', '*def'); // true
+     * Text::wildCardComparison('abcdef', '*abc*'); // true
+     * Text::wildCardComparison('abcdef', '*cde*'); // true
+     * Text::wildCardComparison('abcdef', '*cde'); // false
      *
      * </pre>
      *
@@ -1170,8 +1244,8 @@ class View
     protected function methodExistsStatic($class, $method): bool
     {
         try {
-            return (new \ReflectionMethod($class, $method))->isStatic();
-        } catch (\ReflectionException $e) {
+            return (new ReflectionMethod($class, $method))->isStatic();
+        } catch (ReflectionException $e) {
             return false;
         }
     }
@@ -1200,10 +1274,10 @@ class View
             $this->compileCallBacks($contents, $templateName);
             if ($this->optimize) {
                 // removes space and tabs and replaces by a single space
-                $contents = \preg_replace('/^ {2,}/m', ' ', $contents);
-                $contents = \preg_replace('/^\t{2,}/m', ' ', $contents);
+                $contents = preg_replace('/^ {2,}/m', ' ', $contents);
+                $contents = preg_replace('/^\t{2,}/m', ' ', $contents);
             }
-            $ok = @\file_put_contents($compiled, $contents);
+            $ok = file_put_contents($compiled, $contents);
             if ($ok === false) {
                 $this->showError(
                     'Compiling',
@@ -1224,17 +1298,17 @@ class View
     public function getCompiledFile($templateName = ''): string
     {
         $templateName = (empty($templateName)) ? $this->fileName : $templateName;
-        $style=$this->compileTypeFileName;
-        if ($style==='auto') {
-            $style=($this->getMode() === self::MODE_DEBUG)?'nochange':'sha1';
+        $style = $this->compileTypeFileName;
+        if ($style === 'auto') {
+            $style = ($this->getMode() === self::MODE_DEBUG) ? 'nochange' : 'sha1';
         }
         switch ($style) {
             case 'normal':
                 return $this->compiledPath . '/' . $templateName . $this->compileExtension;
             case 'md5':
-                return $this->compiledPath . '/' . \md5($templateName) . $this->compileExtension;
+                return $this->compiledPath . '/' . md5($templateName) . $this->compileExtension;
             case 'sha1':
-                return $this->compiledPath . '/' . \sha1($templateName) . $this->compileExtension;
+                return $this->compiledPath . '/' . sha1($templateName) . $this->compileExtension;
         }
         return $this->compiledPath . '/' . $templateName . $this->compileExtension;
     }
@@ -1248,7 +1322,7 @@ class View
      */
     public function getMode(): int
     {
-        if (\defined('VIEW_MODE')) {
+        if (defined('VIEW_MODE')) {
             $this->mode = VIEW_MODE;
         }
         return $this->mode;
@@ -1275,19 +1349,19 @@ class View
     public function getTemplateFile($templateName = ''): string
     {
         $templateName = (empty($templateName)) ? $this->fileName : $templateName;
-        if (\strpos($templateName, '/') !== false) {
+        if (str_contains($templateName, '/')) {
             return $this->locateTemplate($templateName); // it's a literal
         }
-        $arr = \explode('.', $templateName);
-        $c = \count($arr);
-        if ($c == 1) {
+        $arr = explode('.', $templateName);
+        $c = count($arr);
+        if ($c === 1) {
             // it's in the root of the template folder.
             return $this->locateTemplate($templateName . $this->fileExtension);
         }
 
         $file = $arr[$c - 1];
-        \array_splice($arr, $c - 1, $c - 1); // delete the last element
-        $path = \implode('/', $arr);
+        array_splice($arr, $c - 1, $c - 1); // delete the last element
+        $path = implode('/', $arr);
         return $this->locateTemplate($path . '/' . $file . $this->fileExtension);
     }
 
@@ -1302,7 +1376,7 @@ class View
         $this->notFoundPath = '';
         foreach ($this->templatePath as $dir) {
             $path = $dir . '/' . $name;
-            if (\is_file($path)) {
+            if (is_file($path)) {
                 return $path;
             }
 
@@ -1320,8 +1394,8 @@ class View
      */
     public function getFile($fullFileName): string
     {
-        if (\is_file($fullFileName)) {
-            return \file_get_contents($fullFileName);
+        if (is_file($fullFileName)) {
+            return file_get_contents($fullFileName);
         }
         $this->showError('getFile', "File does not exist at paths (separated by comma) [$this->notFoundPath] or permission denied");
         return '';
@@ -1348,7 +1422,7 @@ class View
     {
         $compiled = $this->getCompiledFile($fileName);
         $template = $this->getTemplateFile($fileName);
-        if (!\is_file($template)) {
+        if (!is_file($template)) {
             if ($this->mode == self::MODE_DEBUG) {
                 $this->showError('Read file', 'Template not found :' . $this->fileName . " on file: $template", true);
             } else {
@@ -1358,10 +1432,10 @@ class View
         // If the compiled file doesn't exist we will indicate that the view is expired
         // so that it can be re-compiled. Else, we will verify the last modification
         // of the views is less than the modification times of the compiled views.
-        if (!$this->compiledPath || !\is_file($compiled)) {
+        if (!$this->compiledPath || !is_file($compiled)) {
             return true;
         }
-        return \filemtime($compiled) < \filemtime($template);
+        return filemtime($compiled) < filemtime($template);
     }
 
     /**
@@ -1374,8 +1448,8 @@ class View
      */
     protected function evaluateText($content, $variables): string
     {
-        \ob_start();
-        \extract($variables);
+        ob_start();
+        extract($variables);
         // We'll evaluate the contents of the view inside a try/catch block, so we can
         // flush out any stray output that might get out before an error occurs or
         // an exception is thrown. This prevents any partial views from leaking.
@@ -1384,7 +1458,7 @@ class View
         } catch (Exception $e) {
             $this->handleViewException($e);
         }
-        return \ltrim(\ob_get_clean());
+        return ltrim(ob_get_clean());
     }
 
     /**
@@ -1396,7 +1470,7 @@ class View
      */
     protected function handleViewException($e): void
     {
-        \ob_get_clean();
+        ob_get_clean();
         throw $e;
     }
 
@@ -1410,10 +1484,10 @@ class View
      */
     protected function evaluatePath($compiledFile, $variables): string
     {
-        \ob_start();
+        ob_start();
         // note, the variables are extracted locally inside this method,
         // they are not global variables :-3
-        \extract($variables);
+        extract($variables);
         // We'll evaluate the contents of the view inside a try/catch block, so we can
         // flush out any stray output that might get out before an error occurs or
         // an exception is thrown. This prevents any partial views from leaking.
@@ -1422,7 +1496,7 @@ class View
         } catch (Exception $e) {
             $this->handleViewException($e);
         }
-        return \ltrim(\ob_get_clean());
+        return ltrim(ob_get_clean());
     }
 
     /**
@@ -1450,7 +1524,7 @@ class View
     protected function templateExist($templateName): bool
     {
         $file = $this->getTemplateFile($templateName);
-        return \is_file($file);
+        return is_file($file);
     }
 
     /**
@@ -1461,10 +1535,10 @@ class View
      */
     public function convertArg($array): string
     {
-        if (!\is_array($array)) {
+        if (!is_array($array)) {
             return $array;  // nothing to convert.
         }
-        return \implode(' ', \array_map('static::convertArgCallBack', \array_keys($array), $array));
+        return implode(' ', array_map('static::convertArgCallBack', array_keys($array), $array));
     }
 
     /**
@@ -1496,18 +1570,18 @@ class View
     public function regenerateToken($tokenId = '_token'): void
     {
         try {
-            $this->csrf_token = \bin2hex(\random_bytes(10));
+            $this->csrf_token = bin2hex(random_bytes(10));
         } catch (Exception $e) {
             $this->csrf_token = '123456789012345678901234567890'; // unable to generates a random token.
         }
-        @$_SESSION[$tokenId] = $this->csrf_token . '|' . $this->ipClient();
+        $_SESSION[$tokenId] = $this->csrf_token . '|' . $this->ipClient();
     }
 
     public function ipClient()
     {
         if (
             isset($_SERVER['HTTP_X_FORWARDED_FOR'])
-            && \preg_match('/^(d{1,3}).(d{1,3}).(d{1,3}).(d{1,3})$/', $_SERVER['HTTP_X_FORWARDED_FOR'])
+            && preg_match('/^(d{1,3}).(d{1,3}).(d{1,3}).(d{1,3})$/', $_SERVER['HTTP_X_FORWARDED_FOR'])
         ) {
             return $_SERVER['HTTP_X_FORWARDED_FOR'];
         }
@@ -1564,11 +1638,11 @@ class View
         if (empty($this->sectionStack)) {
             $this->showError('stopSection', 'Cannot end a section without first starting one.', true, true);
         }
-        $last = \array_pop($this->sectionStack);
+        $last = array_pop($this->sectionStack);
         if ($overwrite) {
-            $this->sections[$last] = \ob_get_clean();
+            $this->sections[$last] = ob_get_clean();
         } else {
-            $this->extendSection($last, \ob_get_clean());
+            $this->extendSection($last, ob_get_clean());
         }
         return $last;
     }
@@ -1583,7 +1657,7 @@ class View
     protected function extendSection($section, $content): void
     {
         if (isset($this->sections[$section])) {
-            $content = \str_replace($this->PARENTKEY, $content, $this->sections[$section]);
+            $content = str_replace($this->PARENTKEY, $content, $this->sections[$section]);
         }
         $this->sections[$section] = $content;
     }
@@ -1592,12 +1666,12 @@ class View
     {
         if (!$jsconsole) {
             echo '<pre>';
-            \var_dump($object);
+            var_dump($object);
             echo '</pre>';
         } else {
             /** @noinspection BadExpressionStatementJS */
             /** @noinspection JSVoidFunctionReturnValueUsed */
-            echo '<script>console.log(' . \json_encode($object) . ')</script>';
+            echo '<script>console.log(' . json_encode($object) . ')</script>';
         }
     }
 
@@ -1611,7 +1685,7 @@ class View
     public function startSection($section, $content = ''): void
     {
         if ($content === '') {
-            \ob_start() && $this->sectionStack[] = $section;
+            ob_start() && $this->sectionStack[] = $section;
         } else {
             $this->extendSection($section, $content);
         }
@@ -1628,11 +1702,11 @@ class View
         if (empty($this->sectionStack)) {
             $this->showError('appendSection', 'Cannot end a section without first starting one.', true, true);
         }
-        $last = \array_pop($this->sectionStack);
+        $last = array_pop($this->sectionStack);
         if (isset($this->sections[$last])) {
-            $this->sections[$last] .= \ob_get_clean();
+            $this->sections[$last] .= ob_get_clean();
         } else {
-            $this->sections[$last] = \ob_get_clean();
+            $this->sections[$last] = ob_get_clean();
         }
         return $last;
     }
@@ -1642,9 +1716,9 @@ class View
      * <b>Example:</b>
      * <pre>
      * $this->share('variable',10.5);
-     * $this->share('variable2','hello');
+     * $this->share('variable2', 'hello');
      * // or we could add the two variables as:
-     * $this->share(['variable'=>10.5,'variable2'=>'hello']);
+     * $this->share(['variable'=>10.5, 'variable2'=>'hello']);
      * </pre>
      *
      * @param string|array $varname It is the name of the variable or, it is an associative array
@@ -1662,9 +1736,9 @@ class View
      * <b>Example:</b>
      * <pre>
      * $this->share('variable',10.5);
-     * $this->share('variable2','hello');
+     * $this->share('variable2', 'hello');
      * // or we could add the two variables as:
-     * $this->share(['variable'=>10.5,'variable2'=>'hello']);
+     * $this->share(['variable'=>10.5, 'variable2'=>'hello']);
      * </pre>
      *
      * @param string|array $varname It is the name of the variable, or it is an associative array
@@ -1674,7 +1748,7 @@ class View
     public function share($varname, $value = null): View
     {
         if (is_array($varname)) {
-            $this->variablesGlobal = \array_merge($this->variablesGlobal, $varname);
+            $this->variablesGlobal = array_merge($this->variablesGlobal, $varname);
         } else {
             $this->variablesGlobal[$varname] = $value;
         }
@@ -1691,7 +1765,7 @@ class View
     public function yieldContent($section, $default = ''): string
     {
         if (isset($this->sections[$section])) {
-            return \str_replace($this->PARENTKEY, $default, $this->sections[$section]);
+            return str_replace($this->PARENTKEY, $default, $this->sections[$section]);
         }
 
         return $default;
@@ -1754,7 +1828,7 @@ class View
     public function setContentTags($openTag, $closeTag, $escaped = false): void
     {
         $property = ($escaped === true) ? 'escapedTags' : 'contentTags';
-        $this->{$property} = [\preg_quote($openTag), \preg_quote($closeTag)];
+        $this->{$property} = [preg_quote($openTag), preg_quote($closeTag)];
     }
 
     /**
@@ -1766,7 +1840,7 @@ class View
     protected function getTags($escaped = false): array
     {
         $tags = $escaped ? $this->escapedTags : $this->contentTags;
-        return \array_map('stripcslashes', $tags);
+        return array_map('stripcslashes', $tags);
     }
 
     /**
@@ -1834,7 +1908,7 @@ class View
      * @return string
      * @see \Sura\View\View::setCompileTypeFileName
      */
-    public function getCompileTypeFileName(): string
+    public function getCompileTypeFileName()
     {
         return $this->compileTypeFileName;
     }
@@ -1845,7 +1919,7 @@ class View
      * <b>sha1</b> the filename is converted into a sha1 hash (it's the slow method, but it is safest)<br>
      * <b>md5</b> the filename is converted into a md5 hash (it's faster than sha1, and it uses less space)<br>
      * <b>normal</b> the filename is left untouched (it's the fastest mode but the filename could be exposed)<br>
-     * @param string $compileTypeFileName=['auto','sha1','md5','nochange'][$i]
+     * @param string $compileTypeFileName=['auto', 'sha1', 'md5', 'nochange'][$i]
      * @return View
      */
     public function setCompileTypeFileName(string $compileTypeFileName): View
@@ -1861,7 +1935,7 @@ class View
      */
     public function addLoop($data): void
     {
-        $length = \is_array($data) || $data instanceof Countable ? \count($data) : null;
+        $length = is_array($data) || $data instanceof Countable ? count($data) : null;
         $parent = static::last($this->loopsStack);
         $this->loopsStack[] = [
             'index' => -1,
@@ -1872,7 +1946,7 @@ class View
             'even' => true,
             'odd' => false,
             'last' => isset($length) ? $length == 1 : null,
-            'depth' => \count($this->loopsStack) + 1,
+            'depth' => count($this->loopsStack) + 1,
             'parent' => $parent ? (object)$parent : null,
         ];
     }
@@ -1884,7 +1958,7 @@ class View
      */
     public function incrementLoopIndices(): object
     {
-        $c = \count($this->loopsStack) - 1;
+        $c = count($this->loopsStack) - 1;
         $loop = &$this->loopsStack[$c];
 
         $loop['index']++;
@@ -1906,7 +1980,7 @@ class View
      */
     public function popLoop(): void
     {
-        \array_pop($this->loopsStack);
+        array_pop($this->loopsStack);
     }
 
     /**
@@ -1933,7 +2007,7 @@ class View
     {
         $result = '';
 
-        if (\count($data) > 0) {
+        if (count($data) > 0) {
             // If is actually data in the array, we will loop through the data and append
             // an instance of the partial view to the final result HTML passing in the
             // iterated value of this data array, allowing the views to access them.
@@ -1942,7 +2016,7 @@ class View
                 $result .= $this->runChild($view, $data);
             }
         } elseif (static::startsWith($empty, 'raw|')) {
-            $result = \substr($empty, 4);
+            $result = substr($empty, 4);
         } else {
             $result = $this->run($empty, []);
         }
@@ -2001,14 +2075,14 @@ class View
      * It could be stacked.   If it sets null then it clears all definitions.
      * <b>Example:<b><br>
      * <pre>
-     * $this->composer('folder.view',function($view) { $view->share('newvalue','hi there'); });
-     * $this->composer('folder.view','namespace1\namespace2\SomeClass'); // SomeClass must exist, and it must have the
+     * $this->composer('folder.view',function($view) { $view->share('newvalue', 'hi there'); });
+     * $this->composer('folder.view', 'namespace1\namespace2\SomeClass'); // SomeClass must exist, and it must have the
      *                                                                   // method 'composer'
      * $this->composer('folder.*',$instance); // $instance must have the method called 'composer'
      * $this->composer(); // clear all composer.
      * </pre>
      *
-     * @param string|array|null    $view It could contain wildcards (*). Example: 'aa.bb.cc','*.bb.cc','aa.bb.*','*.bb.*'
+     * @param string|array|null    $view It could contain wildcards (*). Example: 'aa.bb.cc', '*.bb.cc', 'aa.bb.*', '*.bb.*'
      *
      * @param callable|string|null $functionOrClass
      * @return View
@@ -2039,7 +2113,7 @@ class View
      */
     public function startComponent($name, array $data = []): void
     {
-        if (\ob_start()) {
+        if (ob_start()) {
             $this->componentStack[] = $name;
 
             $this->componentData[$this->currentComponent()] = $data;
@@ -2055,7 +2129,7 @@ class View
      */
     protected function currentComponent(): int
     {
-        return \count($this->componentStack) - 1;
+        return count($this->componentStack) - 1;
     }
 
     /**
@@ -2067,7 +2141,7 @@ class View
     public function renderComponent(): string
     {
         //echo "<hr>render<br>";
-        $name = \array_pop($this->componentStack);
+        $name = array_pop($this->componentStack);
         //return $this->runChild($name, $this->componentData());
         $cd = $this->componentData();
         $clean = array_keys($cd);
@@ -2108,9 +2182,9 @@ class View
      */
     public function slot($name, $content = null): void
     {
-        if (\count(\func_get_args()) === 2) {
+        if (count(func_get_args()) === 2) {
             $this->slots[$this->currentComponent()][$name] = $content;
-        } elseif (\ob_start()) {
+        } elseif (ob_start()) {
             $this->slots[$this->currentComponent()][$name] = '';
 
             $this->slotStack[$this->currentComponent()][] = $name;
@@ -2126,11 +2200,11 @@ class View
     {
         static::last($this->componentStack);
 
-        $currentSlot = \array_pop(
+        $currentSlot = array_pop(
             $this->slotStack[$this->currentComponent()]
         );
 
-        $this->slots[$this->currentComponent()][$currentSlot] = \trim(\ob_get_clean());
+        $this->slots[$this->currentComponent()][$currentSlot] = trim(ob_get_clean());
     }
 
     /**
@@ -2192,7 +2266,7 @@ class View
     /**
      * @param string[] $currentPermission
      */
-    public function setCurrentPermission($currentPermission): void
+    public function setCurrentPermission(array $currentPermission): void
     {
         $this->currentPermission = $currentPermission;
     }
@@ -2227,18 +2301,18 @@ class View
      */
     public function setBaseUrl($baseUrl): View
     {
-        $this->baseUrl = \rtrim($baseUrl, '/'); // base with the url trimmed
+        $this->baseUrl = rtrim($baseUrl, '/'); // base with the url trimmed
         $this->baseDomain = @parse_url($this->baseUrl)['host'];
         $currentUrl = $this->getCurrentUrlCalculated();
         if ($currentUrl === '') {
             $this->relativePath = '';
             return $this;
         }
-        if (\strpos($currentUrl, $this->baseUrl) === 0) {
-            $part = \str_replace($this->baseUrl, '', $currentUrl);
-            $numf = \substr_count($part, '/') - 1;
+        if (str_starts_with($currentUrl, $this->baseUrl)) {
+            $part = str_replace($this->baseUrl, '', $currentUrl);
+            $numf = substr_count($part, '/') - 1;
             $numf = ($numf > 10) ? 10 : $numf; // avoid overflow
-            $this->relativePath = ($numf < 0) ? '' : \str_repeat('../', $numf);
+            $this->relativePath = ($numf < 0) ? '' : str_repeat('../', $numf);
         } else {
             $this->relativePath = '';
         }
@@ -2452,7 +2526,7 @@ class View
      */
     public function _ef($phrase): string
     {
-        $argv = \func_get_args();
+        $argv = func_get_args();
         $r = $this->_e($phrase);
         $argv[0] = $r; // replace the first argument with the translation.
         $result = @sprintf(...$argv);
@@ -2469,7 +2543,7 @@ class View
      */
     public function _e($phrase): string
     {
-        if ((!\array_key_exists($phrase, static::$dictionary))) {
+        if ((!array_key_exists($phrase, static::$dictionary))) {
             $this->missingTranslation($phrase);
             return $phrase;
         }
@@ -2483,20 +2557,20 @@ class View
      *
      * @param string $txt Message to write on.
      */
-    protected function missingTranslation($txt): void
+    protected function missingTranslation(mixed $txt): void
     {
         if (!$this->missingLog) {
             return; // if there is not a file assigned then it skips saving.
         }
-        $fz = @\filesize($this->missingLog);
-        if (\is_object($txt) || \is_array($txt)) {
-            $txt = \print_r($txt, true);
+        $fz = @filesize($this->missingLog);
+        if (is_object($txt) || is_array($txt)) {
+            $txt = print_r($txt, true);
         }
         // Rewrite file if more than 100000 bytes
         $mode = ($fz > 100000) ? 'w' : 'a';
-        $fp = \fopen($this->missingLog, $mode);
-        \fwrite($fp, $txt . "\n");
-        \fclose($fp);
+        $fp = fopen($this->missingLog, $mode);
+        fwrite($fp, $txt . "\n");
+        fclose($fp);
     }
 
     /**
@@ -2511,7 +2585,7 @@ class View
      */
     public function _n($phrase, $phrases, $num = 0): string
     {
-        if ((!\array_key_exists($phrase, static::$dictionary))) {
+        if ((!array_key_exists($phrase, static::$dictionary))) {
             $this->missingTranslation($phrase);
             return ($num <= 1) ? $phrase : $phrases;
         }
@@ -2600,16 +2674,16 @@ class View
      * @param mixed $text
      * @return null|string|string[]
      */
-    public function stripQuotes($text)
+    public function stripQuotes($text): array|string|null
     {
         if (!$text || strlen($text) < 2) {
             return $text;
         }
         $text = trim($text);
         $p0 = $text[0];
-        $p1 = \substr($text, -1);
+        $p1 = substr($text, -1);
         if ($p0 === $p1 && ($p0 === '"' || $p0 === "'")) {
-            return \substr($text, 1, -1);
+            return substr($text, 1, -1);
         }
         return $text;
     }
@@ -2636,11 +2710,11 @@ class View
     protected function getEchoMethods(): array
     {
         $methods = [
-            'compileRawEchos' => \strlen(\stripcslashes($this->rawTags[0])),
-            'compileEscapedEchos' => \strlen(\stripcslashes($this->escapedTags[0])),
-            'compileRegularEchos' => \strlen(\stripcslashes($this->contentTags[0])),
+            'compileRawEchos' => strlen(stripcslashes($this->rawTags[0])),
+            'compileEscapedEchos' => strlen(stripcslashes($this->escapedTags[0])),
+            'compileRegularEchos' => strlen(stripcslashes($this->contentTags[0])),
         ];
-        \uksort($methods, static function ($method1, $method2) use ($methods) {
+        uksort($methods, static function ($method1, $method2) use ($methods) {
             // Ensure the longest tags are processed first
             if ($methods[$method1] > $methods[$method2]) {
                 return -1;
@@ -2673,7 +2747,7 @@ class View
      *
      * @return array|string|string[]|null
      */
-    protected function compileStatements($value)
+    protected function compileStatements($val)
     {
         /**
          * @param array $match
@@ -2690,7 +2764,7 @@ class View
                 // @@escaped tag
                 $match[0] = isset($match[3]) ? $match[1] . $match[3] : $match[1];
             } else {
-                if (strpos($match[1], '::') !== false) {
+                if (str_contains($match[1], '::')) {
                     // Someclass::method
                     return $this->compileStatementClass($match);
                 }
@@ -2698,12 +2772,12 @@ class View
                     if ($this->customDirectivesRT[$match[1]]) {
                         $match[0] = $this->compileStatementCustom($match);
                     } else {
-                        $match[0] = \call_user_func(
+                        $match[0] = call_user_func(
                             $this->customDirectives[$match[1]],
                             $this->stripParentheses(static::get($match, 3))
                         );
                     }
-                } elseif (\method_exists($this, $method = 'compile' . \ucfirst($match[1]))) {
+                } elseif (method_exists($this, $method = 'compile' . ucfirst($match[1]))) {
                     // it calls the function compile<name of the tag>
                     $match[0] = $this->$method(static::get($match, 3));
                 } else {
@@ -2713,7 +2787,7 @@ class View
             return isset($match[3]) ? $match[0] : $match[0] . $match[2];
         };
         /* return \preg_replace_callback('/\B@(@?\w+)([ \t]*)(\( ( (?>[^()]+) | (?3) )* \))?/x', $callback, $value); */
-        return preg_replace_callback('/\B@(@?\w+(?:::\w+)?)([ \t]*)(\( ( (?>[^()]+) | (?3) )* \))?/x', $callback, $value);
+        return preg_replace_callback('/\B@(@?\w+(?:::\w+)?)([ \t]*)(\( ( (?>[^()]+) | (?3) )* \))?/x', $callback, $val);
     }
 
     /**
@@ -2726,12 +2800,12 @@ class View
     public static function contains($haystack, $needles): bool
     {
         foreach ((array)$needles as $needle) {
-            if ($needle != '') {
-                if (\function_exists('mb_strpos')) {
-                    if (\mb_strpos($haystack, $needle) !== false) {
+            if ($needle !== '') {
+                if (function_exists('mb_strpos')) {
+                    if (str_contains($haystack, $needle)) {
                         return true;
                     }
-                } elseif (\strpos($haystack, $needle) !== false) {
+                } elseif (str_contains($haystack, $needle)) {
                     return true;
                 }
             }
@@ -2758,9 +2832,9 @@ class View
      * @return string
      * @see \Sura\View\View::$aliasClasses
      */
-    protected function fixNamespaceClass($text): string
+    protected function fixNamespaceClass(string $text): string
     {
-        if (strpos($text, '::') === false) {
+        if (!str_contains($text, '::')) {
             return $text;
         }
         $classPart = explode('::', $text, 2);
@@ -2779,7 +2853,7 @@ class View
     protected function compileStatementCustom($match): string
     {
         $v = $this->stripParentheses(static::get($match, 3));
-        $v = ($v == '') ? '' : ',' . $v;
+        $v = ($v == '') ? '' : ', ' . $v;
         return $this->phpTag . 'call_user_func($this->customDirectives[\'' . $match[1] . '\']' . $v . '); ?>';
     }
 
@@ -2793,17 +2867,17 @@ class View
      */
     public static function get($array, $key, $default = null)
     {
-        $accesible = \is_array($array) || $array instanceof ArrayAccess;
+        $accesible = is_array($array) || $array instanceof ArrayAccess;
         if (!$accesible) {
             return static::value($default);
         }
-        if (\is_null($key)) {
+        if (is_null($key)) {
             return $array;
         }
         if (static::exists($array, $key)) {
             return $array[$key];
         }
-        foreach (\explode('.', $key) as $segment) {
+        foreach (explode('.', $key) as $segment) {
             if (static::exists($array, $segment)) {
                 $array = $array[$segment];
             } else {
@@ -2817,15 +2891,15 @@ class View
      * Determine if the given key exists in the provided array.
      *
      * @param ArrayAccess|array $array
-     * @param string|int        $key
+     * @param int|string $key
      * @return bool
      */
-    public static function exists($array, $key): bool
+    public static function exists(ArrayAccess|array $array, int|string $key): bool
     {
         if ($array instanceof ArrayAccess) {
             return $array->offsetExists($key);
         }
-        return \array_key_exists($key, $array);
+        return array_key_exists($key, $array);
     }
 
     /**
@@ -2833,7 +2907,7 @@ class View
      * @param string $expression
      * @return array
      */
-    protected function getArgs($expression): array
+    protected function getArgs(string $expression): array
     {
         return $this->parseArgs($this->stripParentheses($expression), ' ');
     }
@@ -2843,12 +2917,12 @@ class View
      * It excludes quotes,double quotes and the "¬" symbol.<br>
      * <b>Example</b><br>
      * <pre>
-     * $this->parseArgs('a=2,b='a,b,c',d'); // ['a'=>'2','b'=>'a,b,c','d'=>null]
-     * $this->parseArgs('a=2,b=c,d'); // ['a'=>'2','b'=>'c','d'=>null]
-     * $this->parseArgs('a=2 b=c',' '); // ['a'=>'2','b'=>'c']
-     * $this->parseArgs('a:2 b:c',' ',':'); // ['a'=>'2','b'=>'c']
+     * $this->parseArgs('a=2,b='a,b,c',d'); // ['a'=>'2', 'b'=>'a,b,c', 'd'=>null]
+     * $this->parseArgs('a=2,b=c,d'); // ['a'=>'2', 'b'=>'c', 'd'=>null]
+     * $this->parseArgs('a=2 b=c', ' '); // ['a'=>'2', 'b'=>'c']
+     * $this->parseArgs('a:2 b:c', ' ', ':'); // ['a'=>'2', 'b'=>'c']
      * </pre>
-     * Note: parseArgs('a = 2 b = c',' '); with return 4 values instead of 2.
+     * Note: parseArgs('a = 2 b = c', ' '); with return 4 values instead of 2.
      *
      * @param string $text      the text to separate
      * @param string $separator the separator of arguments
@@ -2856,7 +2930,7 @@ class View
      * @param bool   $emptyKey  if the argument is without value, we return it as key (true) or value (false) ?
      * @return array
      */
-    public function parseArgs($text, $separator = ',', $assigment = '=', $emptyKey = true): array
+    public function parseArgs($text, $separator = ', ', $assigment = '=', $emptyKey = true): array
     {
         if ($text === null || $text === '') {
             return []; //nothing to convert.
@@ -2881,7 +2955,7 @@ class View
                 // we close the parenthesis.
                 $insidePar = false;
             }
-            if (strpos($stringArr, $char) !== false) { // if ($char === '"' || $char === "'" || $char === "¬") {
+            if (str_contains($stringArr, $char)) { // if ($char === '"' || $char === "'" || $char === "¬") {
                 // we found a string initializer
                 $inext = strpos($text, $char, $i + 1);
                 $inext = $inext === false ? $strL : $inext;
@@ -2913,7 +2987,7 @@ class View
             $part = trim($part);
             if ($part) {
                 $char = $part[0];
-                if (strpos($stringArr, $char) !== false) { // if ($char === '"' || $char === "'" || $char === "¬") {
+                if (str_contains($stringArr, $char)) { // if ($char === '"' || $char === "'" || $char === "¬") {
                     if ($emptyKey) {
                         $result[$part] = null;
                     } else {
@@ -2935,7 +3009,7 @@ class View
         return $result;
     }
 
-    public function parseArgsOld($text, $separator = ','): array
+    public function parseArgsOld($text, $separator = ', '): array
     {
         if ($text === null || $text === '') {
             return []; //nothing to convert.
@@ -2988,7 +3062,7 @@ class View
      * @return string
      * @\Sura\View\View::$pipeEnable
      */
-    protected function pipeDream($result): string
+    protected function pipeDream(string $result): string
     {
         $array = preg_split('~\\\\.(*SKIP)(*FAIL)|\|~s', $result);
         $c = count($array) - 1; // base zero.
@@ -2996,7 +3070,7 @@ class View
             return $result;
         }
         $prev = '';
-        for ($i = 1; $i <=$c; $i++) {
+        for ($i = 1; $i <= $c; $i++) {
             $r = @explode(':', $array[$i], 2);
             $fnName = trim($r[0]);
             $fnNameF = $fnName[0]; // first character
@@ -3007,19 +3081,19 @@ class View
             } elseif (method_exists($this, $fnName)) {
                 $fnName = '$this->' . $fnName;
             }
-            $hasArgument=count($r) === 2;
+            $hasArgument = count($r) === 2;
             if ($i === 1) {
                 $prev = $fnName . '(' . $array[0];
                 if ($hasArgument) {
-                    $prev .= ',' . $r[1];
+                    $prev .= ', ' . $r[1];
                 }
                 $prev .= ')';
             } else {
                 $prev = $fnName . '(' . $prev;
                 if ($hasArgument) {
-                    $prev .=','. $r[1] . ')';
+                    $prev .= ', ' . $r[1] . ')';
                 } else {
-                    $prev.=')';
+                    $prev .= ')';
                 }
             }
         }
@@ -3033,7 +3107,7 @@ class View
      * @param string $expression
      * @return string
      */
-    protected function compileEach($expression): string
+    protected function compileEach(string $expression): string
     {
         return $this->phpTagEcho . "\$this->renderEach$expression; ?>";
     }
@@ -3041,9 +3115,9 @@ class View
     protected function compileSet($expression): string
     {
         //$segments = \explode('=', \preg_replace("/[()\\\']/", '', $expression));
-        $segments = \explode('=', $this->stripParentheses($expression));
-        $value = (\count($segments) >= 2) ? '=@' . implode('=', array_slice($segments, 1)) : '++';
-        return $this->phpTag . \trim($segments[0]) . $value . ';?>';
+        $segments = explode('=', $this->stripParentheses($expression));
+        $value = (count($segments) >= 2) ? '=@' . implode('=', array_slice($segments, 1)) : '++';
+        return $this->phpTag . trim($segments[0]) . $value . ';?>';
     }
 
     /**
@@ -3052,7 +3126,7 @@ class View
      * @param string $expression
      * @return string
      */
-    protected function compileYield($expression): string
+    protected function compileYield(string $expression): string
     {
         return $this->phpTagEcho . "\$this->yieldContent$expression; ?>";
     }
@@ -3073,7 +3147,7 @@ class View
      * @param string $expression
      * @return string
      */
-    protected function compileSection($expression): string
+    protected function compileSection(string $expression): string
     {
         return $this->phpTag . "\$this->startSection$expression; ?>";
     }
@@ -3124,7 +3198,7 @@ class View
      * @param string $expression
      * @return string
      */
-    protected function compileUnless($expression): string
+    protected function compileUnless(string $expression): string
     {
         return $this->phpTag . "if ( ! $expression): ?>";
     }
@@ -3148,23 +3222,6 @@ class View
     {
         return $this->phpTag . 'endif; ?>';
     }
-    //</editor-fold>
-    //<editor-fold desc="Array Functions">
-
-
-    /**
-     * Compile the {@}compilestamp statement.
-     *
-     * @param string $expression
-     *
-     * @return false|string
-     */
-    protected function compileCompileStamp($expression)
-    {
-        $expression = $this->stripQuotes($this->stripParentheses($expression));
-        $expression = ($expression === '') ? 'Y-m-d H:i:s' : $expression;
-        return date($expression);
-    }
 
     /**
      * compile the {@}viewname statement<br>
@@ -3176,54 +3233,22 @@ class View
      *
      * @return string
      */
-    protected function compileViewName($expression): string
+    protected function compileViewName(mixed $expression): string
     {
         $expression = $this->stripQuotes($this->stripParentheses($expression));
-        switch ($expression) {
-            case 'compiled':
-                return $this->getCompiledFile($this->fileName);
-            case 'template':
-                return $this->getTemplateFile($this->fileName);
-            default:
-                return $this->fileName;
-        }
+        return match ($expression) {
+            'compiled' => $this->getCompiledFile($this->fileName),
+            'template' => $this->getTemplateFile($this->fileName),
+            default => $this->fileName,
+        };
     }
 
-    /**
-     * Compile the endpush statements into valid PHP.
-     *
-     * @return string
-     */
-    protected function compileEndPrepend(): string
+    protected function compileAsset($val): string
     {
-        return $this->phpTag . '$this->stopPrepend(); ?>';
-    }
-
-    protected function compileAsset($expression): string
-    {
-        return $this->phpTagEcho . "(isset(\$this->assetDict[$expression]))?\$this->assetDict[$expression]:\$this->baseUrl.'/'.$expression; ?>";
+        return $this->phpTagEcho . "(isset(\$this->assetDict[$val]))?\$this->assetDict[$val]:\$this->baseUrl.'/'.$val; ?>";
     }
 
     //</editor-fold>
-
-    // <editor-fold desc='language'>
-
-    protected function compileIsset($expression): string
-    {
-        return $this->phpTag . "if(isset$expression): ?>";
-    }
-
-    protected function compileEndIsset(): string
-    {
-        return $this->phpTag . 'endif; ?>';
-    }
-
-    protected function compileEndEmpty(): string
-    {
-        return $this->phpTag . 'endif; ?>';
-    }
-
-    //<editor-fold desc="compile">
 
     /**
      * Used for @_e directive.
@@ -3274,12 +3299,12 @@ class View
 
     /**
      * @param           $key
-     * @param string    $default  is the defalut value is the parameter is set
+     * @param string $default  is the defalut value is the parameter is set
      *                            without value.
-     * @param bool      $set      it is the value returned when the argument is set but there is no value assigned
+     * @param bool $set      it is the value returned when the argument is set but there is no value assigned
      * @return string
      */
-    public static function getParameterCli($key, $default = '', $set = true)
+    public static function getParameterCli($key, string $default = '', bool $set = true): bool|string
     {
         global $argv;
         $p = array_search('-' . $key, $argv, true);
@@ -3299,38 +3324,32 @@ class View
 
     /**
      * @param string $str
-     * @param string $type =['i','e','s','w'][$i]
+     * @param string $type =['i', 'e', 's', 'w'][$i]
      * @return string
      */
-    public static function colorLog($str, $type = 'i'): string
+    public static function colorLog(string $str, string $type = 'i'): string
     {
-        switch ($type) {
-            case 'e': //error
-                return "\033[31m$str\033[0m";
-            case 's': //success
-                return "\033[32m$str\033[0m";
-            case 'w': //warning
-                return "\033[33m$str\033[0m";
-            case 'i': //info
-                return "\033[36m$str\033[0m";
-            case 'b':
-                return "\e[01m$str\e[22m";
-            default:
-                return $str;
-        }
+        return match ($type) {
+            'e' => "\033[31m$str\033[0m",
+            's' => "\033[32m$str\033[0m",
+            'w' => "\033[33m$str\033[0m",
+            'i' => "\033[36m$str\033[0m",
+            'b' => "\e[01m$str\e[22m",
+            default => $str,
+        };
     }
 
     public function checkHealthPath(): bool
     {
         echo self::colorLog("Checking Health\n");
-        $status=true;
+        $status = true;
         if (is_dir($this->compiledPath)) {
             echo "Compile-path [$this->compiledPath] is a folder " . self::colorLog("OK") . "\n";
         } else {
-            $status=false;
+            $status = false;
             echo "Compile-path [$this->compiledPath] is not a folder " . self::colorLog("ERROR", 'e') . "\n";
         }
-        foreach($this->templatePath as $t) {
+        foreach ($this->templatePath as $t) {
             if (is_dir($t)) {
                 echo "Template-path (view) [$t] is a folder " . self::colorLog("OK") . "\n";
             } else {
@@ -3344,12 +3363,12 @@ class View
             $rnd = $this->compiledPath . '/dummy' . rand(10000, 900009);
             $f = @file_put_contents($rnd, 'dummy');
             if ($f === false) {
-                $status=false;
+                $status = false;
                 $error = self::colorLog("Unable to create file [" . $this->compiledPath . '/dummy]', 'e');
             }
             @unlink($rnd);
         } catch (Exception $ex) {
-            $status=false;
+            $status = false;
             $error = self::colorLog($ex->getMessage(), 'e');
         }
         echo "Testing write in the compile folder [$rnd] $error\n";
@@ -3361,9 +3380,9 @@ class View
     public function createFolders(): void
     {
         echo self::colorLog("Creating Folder\n");
-        echo "Creating compile folder[".self::colorLog($this->compiledPath,'b')."] ";
-        if (!\is_dir($this->compiledPath)) {
-            $ok = @\mkdir($this->compiledPath, 0770, true);
+        echo "Creating compile folder[" . self::colorLog($this->compiledPath, 'b') . "] ";
+        if (!is_dir($this->compiledPath)) {
+            $ok = mkdir($this->compiledPath, 0770, true);
             if ($ok === false) {
                 echo self::colorLog("Error: Unable to create folder, check the permissions\n", 'e');
             } else {
@@ -3372,10 +3391,10 @@ class View
         } else {
             echo self::colorLog("Note: folder already exist.\n", 'w');
         }
-        foreach($this->templatePath as $t) {
-            echo "Creating template folder [".self::colorLog($t,'b')."] ";
-            if (!\is_dir($t)) {
-                $ok = @\mkdir($t, 0770, true);
+        foreach ($this->templatePath as $t) {
+            echo "Creating template folder [" . self::colorLog($t, 'b') . "] ";
+            if (!is_dir($t)) {
+                $ok = mkdir($t, 0770, true);
                 if ($ok === false) {
                     echo self::colorLog("Error: Unable to create folder, check the permissions\n", 'e');
                 } else {
@@ -3408,48 +3427,6 @@ class View
         return $count;
     }
 
-    public function cliEngine(): void
-    {
-        $clearcompile = self::getParameterCli('clearcompile');
-        $createfolder = self::getParameterCli('createfolder');
-        $check = self::getParameterCli('check');
-        echo '  ____  _           _       ____             ' . "\n";
-        echo ' |  _ \| |         | |     / __ \            ' . "\n";
-        echo ' | |_) | | __ _  __| | ___| |  | |_ __   ___ ' . "\n";
-        echo ' |  _ <| |/ _` |/ _` |/ _ \ |  | | \'_ \ / _ \\' . "\n";
-        echo ' | |_) | | (_| | (_| |  __/ |__| | | | |  __/' . "\n";
-        echo ' |____/|_|\__,_|\__,_|\___|\____/|_| |_|\___|' . " V." . self::VERSION . "\n\n";
-        echo "\n";
-        $done = false;
-        if ($check) {
-            $done = true;
-            $this->checkHealthPath();
-        }
-        if ($clearcompile) {
-            $done = true;
-            $this->clearcompile();
-        }
-        if($createfolder) {
-            $done=true;
-            $this->createFolders();
-        }
-        if (!$done) {
-            echo " Syntax:\n";
-            echo " ".self::colorLog("-templatepath","b")." <templatepath> (optional) the template-path (view path).\n";
-            echo "    Default value: 'views'\n";
-            echo "    Example: 'php /vendor/bin/suraviewcli /folder/views' (absolute)\n";
-            echo "    Example: 'php /vendor/bin/suraviewcli folder/view1' (relative)\n";
-            echo " ".self::colorLog("-compilepath","b")." <compilepath>  (optional) the compile-path.\n";
-            echo "    Default value: 'compiles'\n";
-            echo "    Example: 'php /vendor/bin/suraviewcli /folder/compiles' (absolute)\n";
-            echo "    Example: 'php /vendor/bin/suraviewcli compiles' (relative)\n";
-            echo " ".self::colorLog("-createfolder","b")." it creates the folders if they don't exist.\n";
-            echo "    Example: php ./vendor/bin/suraviewcli -createfolder\n";
-            echo " ".self::colorLog("-clearcompile","b")." It deletes the content of the compile path\n";
-            echo " ".self::colorLog("-check","b")." It checks the folders and permissions\n";
-        }
-    }
-
     public static function isAbsolutePath($path): bool
     {
         if (!$path) {
@@ -3461,7 +3438,4 @@ class View
         }
         return $path[1] === ':';
     }
-
-    //</editor-fold>
-
 }

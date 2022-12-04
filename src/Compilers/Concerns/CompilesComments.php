@@ -1,8 +1,9 @@
 <?php
 
-
 namespace Sura\View\Compilers\Concerns;
 
+use function preg_replace;
+use function sprintf;
 
 trait CompilesComments
 {
@@ -12,10 +13,9 @@ trait CompilesComments
      * @param string $value
      * @return string
      */
-    protected function compileComments($value): string
+    protected function compileComments(string $value): string
     {
-        $pattern = \sprintf('/%s--(.*?)--%s/s', $this->contentTags[0], $this->contentTags[1]);
-        return \preg_replace($pattern, $this->phpTag . '/*$1*/ ?>', $value);
+        $pattern = sprintf('/%s--(.*?)--%s/s', $this->contentTags[0], $this->contentTags[1]);
+        return preg_replace($pattern, $this->phpTag . '/*$1*/ ?>', $value);
     }
-
 }

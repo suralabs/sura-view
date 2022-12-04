@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Sura\View\Compilers\Concerns;
-
 
 trait CompilesErrors
 {
@@ -27,5 +25,4 @@ trait CompilesErrors
     {
         return $this->phpTag . 'endif; ?>';
     }
-
 }

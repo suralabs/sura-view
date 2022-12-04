@@ -1,15 +1,16 @@
 <?php
 
-
 namespace Sura\View\Compilers\Concerns;
 
+use function strpos;
+use function substr;
 
 trait CompilesInjections
 {
     /**
      * Resolve a given class using the injectResolver callable.
      *
-     * @param string      $className
+     * @param string $className
      * @param string|null $variableName
      * @return mixed
      */
@@ -32,13 +33,13 @@ trait CompilesInjections
     protected function compileInject($expression): string
     {
         $ex = $this->stripParentheses($expression);
-        $p0 = \strpos($ex, ',');
+        $p0 = strpos($ex, ',');
         if (!$p0) {
             $var = $this->stripQuotes($ex);
             $namespace = '';
         } else {
-            $var = $this->stripQuotes(\substr($ex, 0, $p0));
-            $namespace = $this->stripQuotes(\substr($ex, $p0 + 1));
+            $var = $this->stripQuotes(substr($ex, 0, $p0));
+            $namespace = $this->stripQuotes(substr($ex, $p0 + 1));
         }
         return $this->phpTag . "\$$var = \$this->injectClass('$namespace', '$var'); ?>";
     }

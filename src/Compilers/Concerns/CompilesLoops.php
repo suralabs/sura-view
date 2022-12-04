@@ -1,8 +1,9 @@
 <?php
 
-
 namespace Sura\View\Compilers\Concerns;
 
+use function preg_match;
+use function trim;
 
 trait CompilesLoops
 {
@@ -38,12 +39,12 @@ trait CompilesLoops
     protected function compileForeach($expression): string
     {
         //\preg_match('/\( *(.*) * as *([^\)]*)/', $expression, $matches);
-        if($expression===null) {
+        if ($expression === null) {
             return '@foreach';
         }
-        \preg_match('/\( *(.*) * as *([^)]*)/', $expression, $matches);
-        $iteratee = \trim($matches[1]);
-        $iteration = \trim($matches[2]);
+        preg_match('/\( *(.*) * as *([^)]*)/', $expression, $matches);
+        $iteratee = trim($matches[1]);
+        $iteration = trim($matches[2]);
         $initLoop = "\$__currentLoopData = $iteratee; \$this->addLoop(\$__currentLoopData);\$this->getFirstLoop();\n";
         $iterateLoop = '$loop = $this->incrementLoopIndices(); ';
         return $this->phpTag . "$initLoop foreach(\$__currentLoopData as $iteration): $iterateLoop ?>";
@@ -250,5 +251,4 @@ trait CompilesLoops
     {
         return $this->phpTag . "while$expression: ?>";
     }
-
 }
