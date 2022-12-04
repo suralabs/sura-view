@@ -87,7 +87,6 @@ use function var_dump;
 /**
  * View - A View Template implementation
  * @since 1.0
- * @version   1.0
  */
 class View
 {
