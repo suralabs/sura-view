@@ -1905,7 +1905,7 @@ class View
      * @return string
      * @see \Sura\View\View::setCompileTypeFileName
      */
-    public function getCompileTypeFileName(): string
+    public function getCompileTypeFileName()
     {
         return $this->compileTypeFileName;
     }
