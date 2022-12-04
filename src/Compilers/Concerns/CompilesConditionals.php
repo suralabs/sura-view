@@ -127,5 +127,4 @@ trait CompilesConditionals
     {
         return $this->phpTag . '$this->stopPrepend(); ?>';
     }
-
 }

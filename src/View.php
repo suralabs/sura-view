@@ -3299,7 +3299,7 @@ class View
     public function createFolders(): void
     {
         echo self::colorLog("Creating Folder\n");
-        echo "Creating compile folder[".self::colorLog($this->compiledPath,'b')."] ";
+        echo "Creating compile folder[" . self::colorLog($this->compiledPath,'b') . "] ";
         if (!\is_dir($this->compiledPath)) {
             $ok = @\mkdir($this->compiledPath, 0770, true);
             if ($ok === false) {
@@ -3311,7 +3311,7 @@ class View
             echo self::colorLog("Note: folder already exist.\n", 'w');
         }
         foreach($this->templatePath as $t) {
-            echo "Creating template folder [".self::colorLog($t,'b')."] ";
+            echo "Creating template folder [" . self::colorLog($t,'b') . "] ";
             if (!\is_dir($t)) {
                 $ok = @\mkdir($t, 0770, true);
                 if ($ok === false) {
@@ -3373,18 +3373,18 @@ class View
         }
         if (!$done) {
             echo " Syntax:\n";
-            echo " ".self::colorLog("-templatepath","b")." <templatepath> (optional) the template-path (view path).\n";
+            echo " " . self::colorLog("-templatepath","b") . " <templatepath> (optional) the template-path (view path).\n";
             echo "    Default value: 'views'\n";
             echo "    Example: 'php /vendor/bin/suraviewcli /folder/views' (absolute)\n";
             echo "    Example: 'php /vendor/bin/suraviewcli folder/view1' (relative)\n";
-            echo " ".self::colorLog("-compilepath","b")." <compilepath>  (optional) the compile-path.\n";
+            echo " " . self::colorLog("-compilepath","b")  . " <compilepath>  (optional) the compile-path.\n";
             echo "    Default value: 'compiles'\n";
             echo "    Example: 'php /vendor/bin/suraviewcli /folder/compiles' (absolute)\n";
             echo "    Example: 'php /vendor/bin/suraviewcli compiles' (relative)\n";
-            echo " ".self::colorLog("-createfolder","b")." it creates the folders if they don't exist.\n";
+            echo " " . self::colorLog("-createfolder","b") . " it creates the folders if they don't exist.\n";
             echo "    Example: php ./vendor/bin/suraviewcli -createfolder\n";
-            echo " ".self::colorLog("-clearcompile","b")." It deletes the content of the compile path\n";
-            echo " ".self::colorLog("-check","b")." It checks the folders and permissions\n";
+            echo " " . self::colorLog("-clearcompile","b") . " It deletes the content of the compile path\n";
+            echo " " . self::colorLog("-check","b") . " It checks the folders and permissions\n";
         }
     }
 

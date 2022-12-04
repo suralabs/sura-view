@@ -36,7 +36,7 @@ trait CompilesHelpers
     {
         return $this->phpTag . 'endif; ?>';
     }
-    
+
     /**
      * Compile the {@}compilestamp statement.
      *
@@ -49,5 +49,5 @@ trait CompilesHelpers
         $expression = $this->stripQuotes($this->stripParentheses($expression));
         $expression = ($expression === '') ? 'Y-m-d H:i:s' : $expression;
         return date($expression);
-    }    
+    }
 }
