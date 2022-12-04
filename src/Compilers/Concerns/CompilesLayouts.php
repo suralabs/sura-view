@@ -25,7 +25,6 @@ trait  CompilesLayouts
         $this->uidCounter++;
 
         $data = $this->compileExtStr($this->phpTag, $this->uidCounter, $value);
-        
         $this->footer[] = $data;
         return $this->phpTag . '$_shouldextend[' . $this->uidCounter . ']=1; ?>';
     }
