@@ -8,7 +8,4 @@ namespace Sura\View;
  * Trait Lang
  * @package Sura\View
  */
-trait Lang
-{
-    
-}
+trait Lang{}

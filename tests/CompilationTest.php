@@ -17,23 +17,6 @@ class CompilationTest extends AbstractBladeTestCase
     /**
      * @throws \Exception
      */
-    /*    public function testCompilationCallBack()
-            {
-                $this->blade->setMode(View::MODE_DEBUG);
-                $this->blade->compileCallbacks[]= static function (&$content, $templatename = null) {
-                    $content=strtoupper($content);
-                };
-                $this->blade->compileCallbacks[]= static function (&$content, $templatename = null) {
-                    $content='**'.$content.'**';
-                };
-                $this->assertEqualsIgnoringWhitespace("**COMPILATIONTESTTEMPLATE**", 
-                $this->blade->run('compilation.base', []));
-                $this->blade->compileCallbacks=[];
-            }*/
-
-    /**
-     * @throws \Exception
-     */
     public function testCompilationCreatesCompiledFile()
     {
         $this->blade->run('compilation.base', []);
@@ -53,17 +36,6 @@ class CompilationTest extends AbstractBladeTestCase
 
         $this->blade->setMode(View::MODE_SLOW);
     }
-
-    /**
-     * @throws \Exception
-     */
-    /*    public function testCompilationCustomFileExtension()
-        {
-            $this->blade->setFileExtension('.blade.php');
-            $this->assertEqualsIgnoringWhitespace("Custom extension blade file", 
-            $this->blade->run('compilation.base', []));
-            $this->blade->setFileExtension('.blade.php');
-        }*/
 
     /**
      * For the issue #57. Version 3.16
