@@ -36,7 +36,7 @@ trait CompilesLoops
     protected function compileForeach($expression): string
     {
         //\preg_match('/\( *(.*) * as *([^\)]*)/', $expression, $matches);
-        if($expression===null) {
+        if ($expression === null) {
             return '@foreach';
         }
         \preg_match('/\( *(.*) * as *([^)]*)/', $expression, $matches);

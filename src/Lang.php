@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Sura\View;
@@ -8,6 +9,4 @@ namespace Sura\View;
  * @package Sura\View
  */
 trait Lang
-{
-
-}
+{}

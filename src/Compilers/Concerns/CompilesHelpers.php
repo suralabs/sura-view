@@ -4,14 +4,14 @@ namespace Sura\View\Compilers\Concerns;
 
 trait CompilesHelpers
 {
-    protected function compilecsrf($expression = null): string
+    protected function compilecsrf($value = null): string
     {
-        $expression = $expression ?? "'_token'";
-        return "<input type='hidden' name='$this->phpTag echo $expression; ?>' value='{$this->phpTag}echo \$this->csrf_token; " . "?>'/>";
+        $value = $value ?? "'_token'";
+        return "<input type='hidden' name='$this->phpTag echo $value; ?>' value='{$this->phpTag}echo \$this->csrf_token; " . "?>'/>";
     }
 
-    protected function compileDd($expression): string
+    protected function compileDd($value): string
     {
-        return $this->phpTagEcho . "'<pre>'; var_dump$expression; echo '</pre>';?>";
+        return $this->phpTagEcho . "'<pre>'; var_dump$value; echo '</pre>';?>";
     }
 }

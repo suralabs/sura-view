@@ -41,35 +41,35 @@ trait CompilesIncludes
     /**
      * Compile the include statements into valid PHP.
      *
-     * @param string $expression
+     * @param string $value
      * @return string
      */
-    protected function compileIncludeIf($expression): string
+    protected function compileIncludeIf($value): string
     {
-        return $this->phpTag . 'if ($this->templateExist' . $expression . ') echo $this->runChild' . $expression . '; ?>';
+        return $this->phpTag . 'if ($this->templateExist' . $value . ') echo $this->runChild' . $value . '; ?>';
     }
 
     /**
      * Compile the include statements into valid PHP.
      *
-     * @param string $expression
+     * @param string $value
      * @return string
      */
-    protected function compileIncludeWhen($expression): string
+    protected function compileIncludeWhen($value): string
     {
-        $expression = $this->stripParentheses($expression);
-        return $this->phpTagEcho . '$this->includeWhen(' . $expression . '); ?>';
+        $expression = $this->stripParentheses($value);
+        return $this->phpTagEcho . '$this->includeWhen(' . $value . '); ?>';
     }
 
     /**
      * Compile the includefirst statement
      *
-     * @param string $expression
+     * @param string $exprevaluession
      * @return string
      */
-    protected function compileIncludeFirst($expression): string
+    protected function compileIncludeFirst($value): string
     {
-        $expression = $this->stripParentheses($expression);
-        return $this->phpTagEcho . '$this->includeFirst(' . $expression . '); ?>';
+        $expression = $this->stripParentheses($value);
+        return $this->phpTagEcho . '$this->includeFirst(' . $value . '); ?>';
     }
 }
