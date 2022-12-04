@@ -26,7 +26,8 @@ class CompilationTest extends AbstractBladeTestCase
                 $this->blade->compileCallbacks[]= static function (&$content, $templatename = null) {
                     $content='**'.$content.'**';
                 };
-                $this->assertEqualsIgnoringWhitespace("**COMPILATIONTESTTEMPLATE**", $this->blade->run('compilation.base', []));
+                $this->assertEqualsIgnoringWhitespace("**COMPILATIONTESTTEMPLATE**", 
+                $this->blade->run('compilation.base', []));
                 $this->blade->compileCallbacks=[];
             }*/
 
@@ -59,7 +60,8 @@ class CompilationTest extends AbstractBladeTestCase
     /*    public function testCompilationCustomFileExtension()
         {
             $this->blade->setFileExtension('.blade.php');
-            $this->assertEqualsIgnoringWhitespace("Custom extension blade file", $this->blade->run('compilation.base', []));
+            $this->assertEqualsIgnoringWhitespace("Custom extension blade file", 
+            $this->blade->run('compilation.base', []));
             $this->blade->setFileExtension('.blade.php');
         }*/
 

@@ -9,4 +9,6 @@ namespace Sura\View;
  * @package Sura\View
  */
 trait Lang
-{}
+{
+    
+}
