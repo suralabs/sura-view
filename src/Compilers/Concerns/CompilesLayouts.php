@@ -8,7 +8,7 @@ namespace Sura\View\Compilers\Concerns;
  * Trait CompilesLayouts
  * @package Sura\View\Compilers\Concerns
  */
-trait  CompilesLayouts
+trait CompilesLayouts
 {
     /**
      * Compile the extends statements into valid PHP.

@@ -14,7 +14,7 @@ trait CompilesHelpers
     {
         $str_input = "<input type='hidden' name='$val1 echo $val2; ?>'";
         $str_value = "value='{$val1}echo \$this->csrf_token; " . "?>'/>";
-        return $str_input.$str_value;
+        return $str_input . $str_value;
     }
 
     protected function compileDd($value): string
