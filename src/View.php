@@ -9,6 +9,7 @@ use Closure;
 use Countable;
 use Exception;
 use InvalidArgumentException;
+use function mkdir;
 
 /**
  * View - A View Template implementation
@@ -3307,7 +3308,7 @@ class View
         echo self::colorLog("Creating Folder\n");
         echo "Creating compile folder[" . self::colorLog($this->compiledPath, 'b') . "] ";
         if (!\is_dir($this->compiledPath)) {
-            $ok = @\mkdir($this->compiledPath, 0770, true);
+            $ok = mkdir($this->compiledPath, 0770, true);
             if ($ok === false) {
                 echo self::colorLog("Error: Unable to create folder, check the permissions\n", 'e');
             } else {
@@ -3319,7 +3320,7 @@ class View
         foreach($this->templatePath as $t) {
             echo "Creating template folder [" . self::colorLog($t, 'b') . "] ";
             if (!\is_dir($t)) {
-                $ok = @\mkdir($t, 0770, true);
+                $ok = mkdir($t, 0770, true);
                 if ($ok === false) {
                     echo self::colorLog("Error: Unable to create folder, check the permissions\n", 'e');
                 } else {
