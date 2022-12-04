@@ -37,7 +37,7 @@ class View
     public $currentUser;
     /** @var string $currentRole Current role. Example: admin */
     public $currentRole;
-    /** @var string[] $currentPermission Current permission. Example ['edit','add'] */
+    /** @var string[] $currentPermission Current permission. Example ['edit', 'add'] */
     public $currentPermission = [];
     /** @var callable callback of validation. It is used for @can,@cannot */
     public $authCallBack;
@@ -124,7 +124,7 @@ class View
     /** @var string the extension of the compiled file. */
     protected $compileExtension = '.bladec';
     /**
-     * @var string=['auto','sha1','md5','nochange'][$i] It determines how the compiled filename will be called.<br>
+     * @var string=['auto', 'sha1', 'md5', 'nochange'][$i] It determines how the compiled filename will be called.<br>
      *            <b>auto</b> (default mode) the mode is "sha1" unless the mode is MODE_DEBUG<br>
      *            <b>sha1</b> the filename is converted into a sha1 hash<br>
      *            <b>md5</b> the filename is converted into a md5 hash<br>
@@ -339,8 +339,8 @@ class View
      * <b>Example:</b><br>
      * <pre>
      * $this->wrapPHP('$hello'); // "< ?php echo $this->e($hello); ? >"
-     * $this->wrapPHP('$hello',''); // < ?php echo $this->e($hello); ? >
-     * $this->wrapPHP('$hello','',false); // < ?php echo $hello; ? >
+     * $this->wrapPHP('$hello', ''); // < ?php echo $this->e($hello); ? >
+     * $this->wrapPHP('$hello', '',false); // < ?php echo $hello; ? >
      * $this->wrapPHP('"hello"'); // "< ?php echo $this->e("hello"); ? >"
      * $this->wrapPHP('hello()'); // "< ?php echo $this->e(hello()); ? >"
      * </pre>
@@ -699,8 +699,8 @@ class View
 
     /**
      * It adds an alias to the link of the resources.<br>
-     * addAssetDict('name','url/res.jpg')<br>
-     * addAssetDict(['name'=>'url/res.jpg','name2'=>'url/res2.jpg']);
+     * addAssetDict('name', 'url/res.jpg')<br>
+     * addAssetDict(['name'=>'url/res.jpg', 'name2'=>'url/res2.jpg']);
      *
      * @param string|array $name example 'css/style.css', you could also add an array
      * @param string       $url  example https://www.web.com/style.css'
@@ -850,7 +850,7 @@ class View
      * @param string     $splitEnd
      * @return string
      */
-    public function splitForeach($each = 1, $splitText = ',', $splitEnd = ''): string
+    public function splitForeach($each = 1, $splitText = ', ', $splitEnd = ''): string
     {
         $loopStack = static::last($this->loopsStack); // array(7) { ["index"]=> int(0) ["remaining"]=> int(6) ["count"]=> int(5) ["first"]=> bool(true) ["last"]=> bool(false) ["depth"]=> int(1) ["parent"]=> NULL }
         if (($loopStack['index']) == $loopStack['count'] - 1) {
@@ -1106,11 +1106,11 @@ class View
      * The wildcards only works at the beginning and/or at the end of the string.<br>
      * <b>Example:<b><br>
      * <pre>
-     * Text::wildCardComparison('abcdef','abc*'); // true
-     * Text::wildCardComparison('abcdef','*def'); // true
-     * Text::wildCardComparison('abcdef','*abc*'); // true
-     * Text::wildCardComparison('abcdef','*cde*'); // true
-     * Text::wildCardComparison('abcdef','*cde'); // false
+     * Text::wildCardComparison('abcdef', 'abc*'); // true
+     * Text::wildCardComparison('abcdef', '*def'); // true
+     * Text::wildCardComparison('abcdef', '*abc*'); // true
+     * Text::wildCardComparison('abcdef', '*cde*'); // true
+     * Text::wildCardComparison('abcdef', '*cde'); // false
      *
      * </pre>
      *
@@ -1626,9 +1626,9 @@ class View
      * <b>Example:</b>
      * <pre>
      * $this->share('variable',10.5);
-     * $this->share('variable2','hello');
+     * $this->share('variable2', 'hello');
      * // or we could add the two variables as:
-     * $this->share(['variable'=>10.5,'variable2'=>'hello']);
+     * $this->share(['variable'=>10.5, 'variable2'=>'hello']);
      * </pre>
      *
      * @param string|array $varname It is the name of the variable or, it is an associative array
@@ -1646,9 +1646,9 @@ class View
      * <b>Example:</b>
      * <pre>
      * $this->share('variable',10.5);
-     * $this->share('variable2','hello');
+     * $this->share('variable2', 'hello');
      * // or we could add the two variables as:
-     * $this->share(['variable'=>10.5,'variable2'=>'hello']);
+     * $this->share(['variable'=>10.5, 'variable2'=>'hello']);
      * </pre>
      *
      * @param string|array $varname It is the name of the variable, or it is an associative array
@@ -1829,7 +1829,7 @@ class View
      * <b>sha1</b> the filename is converted into a sha1 hash (it's the slow method, but it is safest)<br>
      * <b>md5</b> the filename is converted into a md5 hash (it's faster than sha1, and it uses less space)<br>
      * <b>normal</b> the filename is left untouched (it's the fastest mode but the filename could be exposed)<br>
-     * @param string $compileTypeFileName=['auto','sha1','md5','nochange'][$i]
+     * @param string $compileTypeFileName=['auto', 'sha1', 'md5', 'nochange'][$i]
      * @return View
      */
     public function setCompileTypeFileName(string $compileTypeFileName): View
@@ -1985,14 +1985,14 @@ class View
      * It could be stacked.   If it sets null then it clears all definitions.
      * <b>Example:<b><br>
      * <pre>
-     * $this->composer('folder.view',function($view) { $view->share('newvalue','hi there'); });
-     * $this->composer('folder.view','namespace1\namespace2\SomeClass'); // SomeClass must exist, and it must have the
+     * $this->composer('folder.view',function($view) { $view->share('newvalue', 'hi there'); });
+     * $this->composer('folder.view', 'namespace1\namespace2\SomeClass'); // SomeClass must exist, and it must have the
      *                                                                   // method 'composer'
      * $this->composer('folder.*',$instance); // $instance must have the method called 'composer'
      * $this->composer(); // clear all composer.
      * </pre>
      *
-     * @param string|array|null    $view It could contain wildcards (*). Example: 'aa.bb.cc','*.bb.cc','aa.bb.*','*.bb.*'
+     * @param string|array|null    $view It could contain wildcards (*). Example: 'aa.bb.cc', '*.bb.cc', 'aa.bb.*', '*.bb.*'
      *
      * @param callable|string|null $functionOrClass
      * @return View
@@ -2763,7 +2763,7 @@ class View
     protected function compileStatementCustom($match): string
     {
         $v = $this->stripParentheses(static::get($match, 3));
-        $v = ($v == '') ? '' : ',' . $v;
+        $v = ($v == '') ? '' : ', ' . $v;
         return $this->phpTag . 'call_user_func($this->customDirectives[\'' . $match[1] . '\']' . $v . '); ?>';
     }
 
@@ -2827,12 +2827,12 @@ class View
      * It excludes quotes,double quotes and the "¬" symbol.<br>
      * <b>Example</b><br>
      * <pre>
-     * $this->parseArgs('a=2,b='a,b,c',d'); // ['a'=>'2','b'=>'a,b,c','d'=>null]
-     * $this->parseArgs('a=2,b=c,d'); // ['a'=>'2','b'=>'c','d'=>null]
-     * $this->parseArgs('a=2 b=c',' '); // ['a'=>'2','b'=>'c']
-     * $this->parseArgs('a:2 b:c',' ',':'); // ['a'=>'2','b'=>'c']
+     * $this->parseArgs('a=2,b='a,b,c',d'); // ['a'=>'2', 'b'=>'a,b,c', 'd'=>null]
+     * $this->parseArgs('a=2,b=c,d'); // ['a'=>'2', 'b'=>'c', 'd'=>null]
+     * $this->parseArgs('a=2 b=c', ' '); // ['a'=>'2', 'b'=>'c']
+     * $this->parseArgs('a:2 b:c', ' ', ':'); // ['a'=>'2', 'b'=>'c']
      * </pre>
-     * Note: parseArgs('a = 2 b = c',' '); with return 4 values instead of 2.
+     * Note: parseArgs('a = 2 b = c', ' '); with return 4 values instead of 2.
      *
      * @param string $text      the text to separate
      * @param string $separator the separator of arguments
@@ -2840,7 +2840,7 @@ class View
      * @param bool   $emptyKey  if the argument is without value, we return it as key (true) or value (false) ?
      * @return array
      */
-    public function parseArgs($text, $separator = ',', $assigment = '=', $emptyKey = true): array
+    public function parseArgs($text, $separator = ', ', $assigment = '=', $emptyKey = true): array
     {
         if ($text === null || $text === '') {
             return []; //nothing to convert.
@@ -2919,7 +2919,7 @@ class View
         return $result;
     }
 
-    public function parseArgsOld($text, $separator = ','): array
+    public function parseArgsOld($text, $separator = ', '): array
     {
         if ($text === null || $text === '') {
             return []; //nothing to convert.
@@ -2995,13 +2995,13 @@ class View
             if ($i === 1) {
                 $prev = $fnName . '(' . $array[0];
                 if ($hasArgument) {
-                    $prev .= ',' . $r[1];
+                    $prev .= ', ' . $r[1];
                 }
                 $prev .= ')';
             } else {
                 $prev = $fnName . '(' . $prev;
                 if ($hasArgument) {
-                    $prev .=','. $r[1] . ')';
+                    $prev .=', '. $r[1] . ')';
                 } else {
                     $prev.=')';
                 }
@@ -3237,7 +3237,7 @@ class View
 
     /**
      * @param string $str
-     * @param string $type =['i','e','s','w'][$i]
+     * @param string $type =['i', 'e', 's', 'w'][$i]
      * @return string
      */
     public static function colorLog($str, $type = 'i'): string
@@ -3299,7 +3299,7 @@ class View
     public function createFolders(): void
     {
         echo self::colorLog("Creating Folder\n");
-        echo "Creating compile folder[" . self::colorLog($this->compiledPath,'b') . "] ";
+        echo "Creating compile folder[" . self::colorLog($this->compiledPath, 'b') . "] ";
         if (!\is_dir($this->compiledPath)) {
             $ok = @\mkdir($this->compiledPath, 0770, true);
             if ($ok === false) {
@@ -3311,7 +3311,7 @@ class View
             echo self::colorLog("Note: folder already exist.\n", 'w');
         }
         foreach($this->templatePath as $t) {
-            echo "Creating template folder [" . self::colorLog($t,'b') . "] ";
+            echo "Creating template folder [" . self::colorLog($t, 'b') . "] ";
             if (!\is_dir($t)) {
                 $ok = @\mkdir($t, 0770, true);
                 if ($ok === false) {
@@ -3373,18 +3373,19 @@ class View
         }
         if (!$done) {
             echo " Syntax:\n";
-            echo " " . self::colorLog("-templatepath","b") . " <templatepath> (optional) the template-path (view path).\n";
+            echo " " . self::colorLog("-templatepath", "b") 
+            . " <templatepath> (optional) the template-path (view path).\n";
             echo "    Default value: 'views'\n";
             echo "    Example: 'php /vendor/bin/suraviewcli /folder/views' (absolute)\n";
             echo "    Example: 'php /vendor/bin/suraviewcli folder/view1' (relative)\n";
-            echo " " . self::colorLog("-compilepath","b")  . " <compilepath>  (optional) the compile-path.\n";
+            echo " " . self::colorLog("-compilepath", "b")  . " <compilepath>  (optional) the compile-path.\n";
             echo "    Default value: 'compiles'\n";
             echo "    Example: 'php /vendor/bin/suraviewcli /folder/compiles' (absolute)\n";
             echo "    Example: 'php /vendor/bin/suraviewcli compiles' (relative)\n";
-            echo " " . self::colorLog("-createfolder","b") . " it creates the folders if they don't exist.\n";
+            echo " " . self::colorLog("-createfolder", "b") . " it creates the folders if they don't exist.\n";
             echo "    Example: php ./vendor/bin/suraviewcli -createfolder\n";
-            echo " " . self::colorLog("-clearcompile","b") . " It deletes the content of the compile path\n";
-            echo " " . self::colorLog("-check","b") . " It checks the folders and permissions\n";
+            echo " " . self::colorLog("-clearcompile", "b") . " It deletes the content of the compile path\n";
+            echo " " . self::colorLog("-check", "b") . " It checks the folders and permissions\n";
         }
     }
 
