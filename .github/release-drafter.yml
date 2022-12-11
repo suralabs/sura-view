@@ -44,7 +44,6 @@ version-resolver:
       - dependencies
   patch:
     labels:
-      - patch
       - type:build
       - bug
       - bugfix
