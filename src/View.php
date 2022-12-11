@@ -392,6 +392,10 @@ class View
         // Prevent "Deprecated: htmlentities():
         // Passing null to parameter #1 ($string) of type string is deprecated" message
 
+        return (is_array($value) || is_object($value))
+        ? \print_r($value, true)
+        : $value;
+        
         if (is_null($value)) {
             return '';
         }
@@ -2779,7 +2783,7 @@ class View
                     }
                 } elseif (method_exists($this, $method = 'compile' . ucfirst($match[1]))) {
                     // it calls the function compile<name of the tag>
-                    $match[0] = $this->$method(static::get($match, 3));
+                    $match[0] = $this->$method(static::get($match, '3'));
                 } else {
                     return $match[0];
                 }
