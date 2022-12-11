@@ -1,11 +1,15 @@
 <?php
-
 declare(strict_types=1);
 
 namespace Sura\View\Compilers\Concerns;
 
+
 trait CompilesAuthorizations
 {
+    /**
+     * @param $expression
+     * @return string
+     */
     protected function compileCan($expression): string
     {
         $v = $this->stripParentheses($expression);
@@ -27,9 +31,11 @@ trait CompilesAuthorizations
 
         return $this->phpTag . 'else: ?>';
     }
-    //</editor-fold>
-    //<editor-fold desc="file members">
 
+    /**
+     * @param $expression
+     * @return string
+     */
     protected function compileCannot($expression): string
     {
         $v = $this->stripParentheses($expression);
@@ -79,4 +85,35 @@ trait CompilesAuthorizations
         }
         return $this->phpTag . 'elseif (call_user_func($this->authAnyCallBack,' . $role . ')): ?>';
     }
+
+    /**
+     * Compile the end-can statements into valid PHP.
+     *
+     * @return string
+     */
+    protected function compileEndcan(): string
+    {
+        return $this->phpTag . 'endif; ?>';
+    }
+
+    /**
+     * Compile the end-can statements into valid PHP.
+     *
+     * @return string
+     */
+    protected function compileEndcanany(): string
+    {
+        return $this->phpTag . 'endif; ?>';
+    }
+
+    /**
+     * Compile the end-cannot statements into valid PHP.
+     *
+     * @return string
+     */
+    protected function compileEndcannot(): string
+    {
+        return $this->phpTag . 'endif; ?>';
+    }
+
 }
