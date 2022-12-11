@@ -1,98 +1,21 @@
 <?php
 
+
 namespace Sura\View\Compilers\Concerns;
 
-use function preg_match;
-use function trim;
 
 trait CompilesLoops
 {
-    /**
-     * Compile the else statements into valid PHP.
-     *
-     * @return string
-     */
-    protected function compileElse(): string
-    {
-        return $this->phpTag . 'else: ?>';
-    }
-
-    /**
-     * Compile the for statements into valid PHP.
-     *
-     * @param string $expression
-     * @return string
-     */
-    protected function compileFor($expression): string
-    {
-        return $this->phpTag . "for$expression: ?>";
-    }
-    //</editor-fold>
-    //<editor-fold desc="string functions">
-
-    /**
-     * Compile the foreach statements into valid PHP.
-     *
-     * @param string $expression
-     * @return string
-     */
-    protected function compileForeach($expression): string
-    {
-        //\preg_match('/\( *(.*) * as *([^\)]*)/', $expression, $matches);
-        if ($expression === null) {
-            return '@foreach';
-        }
-        preg_match('/\( *(.*) * as *([^)]*)/', $expression, $matches);
-        $iteratee = trim($matches[1]);
-        $iteration = trim($matches[2]);
-        $initLoop = "\$__currentLoopData = $iteratee; \$this->addLoop(\$__currentLoopData);\$this->getFirstLoop();\n";
-        $iterateLoop = '$loop = $this->incrementLoopIndices(); ';
-        return $this->phpTag . "$initLoop foreach(\$__currentLoopData as $iteration): $iterateLoop ?>";
-    }
-
-    /**
-     * Compile a split of a foreach cycle. Used for example when we want to separate limites each "n" elements.
-     *
-     * @param string $expression
-     * @return string
-     */
-    protected function compileSplitForeach($expression): string
-    {
-        return $this->phpTagEcho . '$this::splitForeach' . $expression . '; ?>';
-    }
-
-    /**
-     * Compile the break statements into valid PHP.
-     *
-     * @param string $expression
-     * @return string
-     */
-    protected function compileBreak($expression): string
-    {
-        return $expression ? $this->phpTag . "if$expression break; ?>" : $this->phpTag . 'break; ?>';
-    }
-
-    /**
-     * Compile the continue statements into valid PHP.
-     *
-     * @param string $expression
-     * @return string
-     */
-    protected function compileContinue($expression): string
-    {
-        return $expression ? $this->phpTag . "if$expression continue; ?>" : $this->phpTag . 'continue; ?>';
-    }
-
     /**
      * Compile the forelse statements into valid PHP.
      *
      * @param string $expression
      * @return string
      */
-    protected function compileForelse($expression): string
+    protected function compileForelse(string $expression): string
     {
         $empty = '$__empty_' . ++$this->forelseCounter;
-        return $this->phpTag . "$empty = true; foreach$expression: $empty = false; ?>";
+        return $this->phpTag . "{$empty} = true; foreach{$expression}: {$empty} = false; ?>";
     }
 
     /**
@@ -101,12 +24,10 @@ trait CompilesLoops
      * @param string $expression
      * @return string
      */
-    protected function compileIf($expression): string
+    protected function compileIf(string $expression): string
     {
-        return $this->phpTag . "if$expression: ?>";
+        return $this->phpTag . "if{$expression}: ?>";
     }
-    //</editor-fold>
-    //<editor-fold desc="loop functions">
 
     /**
      * Compile the else-if statements into valid PHP.
@@ -114,9 +35,9 @@ trait CompilesLoops
      * @param string $expression
      * @return string
      */
-    protected function compileElseif($expression): string
+    protected function compileElseif(string $expression): string
     {
-        return $this->phpTag . "elseif$expression: ?>";
+        return $this->phpTag . "elseif{$expression}: ?>";
     }
 
     /**
@@ -129,9 +50,9 @@ trait CompilesLoops
     {
         if ($expression == '') {
             $empty = '$__empty_' . $this->forelseCounter--;
-            return $this->phpTag . "endforeach; if ($empty): ?>";
+            return $this->phpTag . "endforeach; if ({$empty}): ?>";
         }
-        return $this->phpTag . "if (empty$expression): ?>";
+        return $this->phpTag . "if (empty{$expression}): ?>";
     }
 
     /**
@@ -140,9 +61,9 @@ trait CompilesLoops
      * @param string $expression
      * @return string
      */
-    protected function compileHasSection($expression): string
+    protected function compileHasSection(string $expression): string
     {
-        return $this->phpTag . "if (! empty(trim(\$this->yieldContent$expression))): ?>";
+        return $this->phpTag . "if (! empty(trim(\$this->yieldContent{$expression}))): ?>";
     }
 
     /**
@@ -175,45 +96,97 @@ trait CompilesLoops
         return $this->phpTag . 'endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>';
     }
 
-
     /**
-     * Compile the end-can statements into valid PHP.
+     * Compile the for statements into valid PHP.
      *
+     * @param string $expression
      * @return string
      */
-    protected function compileEndcan(): string
+    protected function compileFor(string $expression): string
     {
-        return $this->phpTag . 'endif; ?>';
+        return $this->phpTag . "for{$expression}: ?>";
     }
 
     /**
-     * Compile the end-can statements into valid PHP.
+     * Compile the foreach statements into valid PHP.
      *
+     * @param string $expression
      * @return string
      */
-    protected function compileEndcanany(): string
+    protected function compileForeach(string $expression): string
     {
-        return $this->phpTag . 'endif; ?>';
+        //\preg_match('/\( *(.*) * as *([^\)]*)/', $expression, $matches);
+        \preg_match('/\( *(.*) * as *([^)]*)/', $expression, $matches);
+        $iteratee = \trim($matches[1]);
+        $iteration = \trim($matches[2]);
+        $initLoop = "\$__currentLoopData = {$iteratee}; \$this->addLoop(\$__currentLoopData);\$this->getFirstLoop();\n";
+        $iterateLoop = '$loop = $this->incrementLoopIndices(); ';
+        return $this->phpTag . "{$initLoop} foreach(\$__currentLoopData as {$iteration}): {$iterateLoop} ?>";
     }
 
     /**
-     * Compile the end-cannot statements into valid PHP.
+     * Compile a split of a foreach cycle. Used for example when we want to separate limites each "n" elements.
      *
+     * @param string $expression
      * @return string
      */
-    protected function compileEndcannot(): string
+    protected function compileSplitForeach(string $expression): string
     {
-        return $this->phpTag . 'endif; ?>';
+        return $this->phpTagEcho . '$this::splitForeach' . $expression . '; ?>';
     }
 
     /**
-     * Compile the end-if statements into valid PHP.
+     * Compile the break statements into valid PHP.
      *
+     * @param string $expression
      * @return string
      */
-    protected function compileEndif(): string
+    protected function compileBreak(string $expression): string
     {
-        return $this->phpTag . 'endif; ?>';
+        return $expression ? $this->phpTag . "if{$expression} break; ?>" : $this->phpTag . 'break; ?>';
+    }
+
+    /**
+     * Compile the continue statements into valid PHP.
+     *
+     * @param string $expression
+     * @return string
+     */
+    protected function compileContinue(string $expression): string
+    {
+        return $expression ? $this->phpTag . "if{$expression} continue; ?>" : $this->phpTag . 'continue; ?>';
+    }
+
+    /**
+     * Compile the auth statements into valid PHP.
+     *
+     * @param string $expression
+     * @return string
+     */
+    protected function compileAuth($expression = ''): string
+    {
+        $role = $this->stripParentheses($expression);
+        if ($role == '') {
+            return $this->phpTag . 'if(isset($this->currentUser)): ?>';
+        }
+
+        return $this->phpTag . "if(isset(\$this->currentUser) && \$this->currentRole=={$role}): ?>";
+    }
+
+    /**
+     * Compile the elseauth statements into valid PHP.
+     *
+     * @param string $expression
+     * @return string
+     */
+    protected function compileElseAuth(mixed $expression = ''): string
+    {
+        $role = $this->stripParentheses($expression);
+        if ($role == '') {
+            return $this->phpTag . 'else: ?>';
+        }
+
+        return $this->phpTag . "elseif(isset(\$this->currentUser) && \$this->currentRole=={$role}): ?>";
     }
 
     /**
@@ -227,18 +200,11 @@ trait CompilesLoops
     }
 
     /**
-     * Execute the case tag.
-     *
-     * @param $expression
      * @return string
      */
-    protected function compileCase($expression): string
+    protected function compileEndEmpty(): string
     {
-        if ($this->firstCaseInSwitch) {
-            $this->firstCaseInSwitch = false;
-            return 'case ' . $expression . ': ?>';
-        }
-        return $this->phpTag . "case $expression: ?>";
+        return $this->phpTag . 'endif; ?>';
     }
 
     /**
@@ -247,8 +213,8 @@ trait CompilesLoops
      * @param string $expression
      * @return string
      */
-    protected function compileWhile($expression): string
+    protected function compileWhile(string $expression): string
     {
-        return $this->phpTag . "while$expression: ?>";
+        return $this->phpTag . "while{$expression}: ?>";
     }
 }

@@ -1,27 +1,37 @@
 <?php
 
+
 namespace Sura\View\Compilers\Concerns;
 
-use function explode;
-use function is_file;
 
 trait CompilesIncludes
 {
+    /**
+     * Compile the each statements into valid PHP.
+     *
+     * @param string $expression
+     * @return string
+     */
+    protected function compileEach(string $expression): string
+    {
+        return $this->phpTagEcho . "\$this->renderEach{$expression}; ?>";
+    }
+
     /**
      * Compile the include statements into valid PHP.
      *
      * @param string $expression
      * @return string
      */
-    protected function compileInclude($expression): string
+    protected function compileInclude(string $expression): string
     {
         $expression = $this->stripParentheses($expression);
         return $this->phpTagEcho . '$this->runChild(' . $expression . '); ?>';
     }
 
     /**
-     * It loads a compiled template and paste inside the code.<br>
-     * It uses more disk space, but it decreases the number of includes<br>
+     * It loads an compiled template and paste inside the code.<br>
+     * It uses more disk space but it decreases the number of includes<br>
      *
      * @param $expression
      * @return string
@@ -31,10 +41,10 @@ trait CompilesIncludes
     {
         $expression = $this->stripParentheses($expression);
         $ex = $this->stripParentheses($expression);
-        $exp = explode(',', $ex);
-        $file = $this->stripQuotes($exp[0] ?? null);
+        $exp = \explode(',', $ex);
+        $file = $this->stripQuotes(isset($exp[0]) ? $exp[0] : null);
         $fileC = $this->getCompiledFile($file);
-        if (!@is_file($fileC)) {
+        if (!@\file_exists($fileC)) {
             // if the file doesn't exist then it's created
             $this->compile($file, true);
         }
@@ -44,35 +54,35 @@ trait CompilesIncludes
     /**
      * Compile the include statements into valid PHP.
      *
-     * @param string $value
+     * @param string $expression
      * @return string
      */
-    protected function compileIncludeIf($value): string
+    protected function compileIncludeIf(string $expression): string
     {
-        return $this->phpTag . 'if ($this->templateExist' . $value . ') echo $this->runChild' . $value . '; ?>';
+        return $this->phpTag . 'if ($this->templateExist' . $expression . ') echo $this->runChild' . $expression . '; ?>';
     }
 
     /**
      * Compile the include statements into valid PHP.
      *
-     * @param string $value
+     * @param string $expression
      * @return string
      */
-    protected function compileIncludeWhen($value): string
+    protected function compileIncludeWhen(string $expression): string
     {
-        $expression = $this->stripParentheses($value);
-        return $this->phpTagEcho . '$this->includeWhen(' . $value . '); ?>';
+        $expression = $this->stripParentheses($expression);
+        return $this->phpTagEcho . '$this->includeWhen(' . $expression . '); ?>';
     }
 
     /**
      * Compile the includefirst statement
      *
-     * @param string $exprevaluession
+     * @param string $expression
      * @return string
      */
-    protected function compileIncludeFirst($value): string
+    protected function compileIncludeFirst(string $expression): string
     {
-        $expression = $this->stripParentheses($value);
-        return $this->phpTagEcho . '$this->includeFirst(' . $value . '); ?>';
+        $expression = $this->stripParentheses($expression);
+        return $this->phpTagEcho . '$this->includeFirst(' . $expression . '); ?>';
     }
 }

@@ -1,6 +1,8 @@
 <?php
 
+
 namespace Sura\View\Compilers\Concerns;
+
 
 trait CompilesStacks
 {
@@ -10,9 +12,9 @@ trait CompilesStacks
      * @param string $expression
      * @return string
      */
-    protected function compileStack($expression): string
+    protected function compileStack(string $expression): string
     {
-        return $this->phpTagEcho . "\$this->yieldPushContent$expression; ?>";
+        return $this->phpTagEcho . "\$this->yieldPushContent{$expression}; ?>";
     }
 
     /**
@@ -36,13 +38,12 @@ trait CompilesStacks
     }
 
     /**
-     * Compile the push statements into valid PHP.
+     * Compile the endpush statements into valid PHP.
      *
-     * @param string $expression
      * @return string
      */
-    public function compilePrepend($expression): string
+    protected function compileEndPrepend(): string
     {
-        return $this->phpTag . "\$this->startPush$expression; ?>";
+        return $this->phpTag . '$this->stopPrepend(); ?>';
     }
 }

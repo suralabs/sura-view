@@ -1,6 +1,8 @@
 <?php
 
+
 namespace Sura\View\Compilers\Concerns;
+
 
 trait CompilesRawPhp
 {
@@ -10,9 +12,9 @@ trait CompilesRawPhp
      * @param string $expression
      * @return string
      */
-    protected function compileUnset($expression): string
+    protected function compileUnset(string $expression): string
     {
-        return $this->phpTag . "unset$expression; ?>";
+        return $this->phpTag . "unset{$expression}; ?>";
     }
 
     /**
@@ -21,12 +23,10 @@ trait CompilesRawPhp
      * @param string $expression
      * @return string
      */
-    protected function compilePhp($expression): string
+    protected function compilePhp(string $expression): string
     {
-        return $expression ? $this->phpTag . "$expression; ?>" : $this->phpTag;
+        return $expression ? $this->phpTag . "{$expression}; ?>" : $this->phpTag;
     }
-
-    //<editor-fold desc="setter and getters">
 
     /**
      * Compile end-php statement into valid PHP.
