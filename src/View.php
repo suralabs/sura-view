@@ -2645,7 +2645,7 @@ class View
                     } else {
                         $match[0] = \call_user_func(
                             $this->customDirectives[$match[1]],
-                            $this->stripParentheses(static::get($match, 3))
+                            $this->stripParentheses(static::get($match, '3'))
                         );
                     }
                 } elseif (\method_exists($this, $method = 'compile' . \ucfirst($match[1]))) {
@@ -2738,7 +2738,7 @@ class View
      */
     protected function compileStatementCustom($match): string
     {
-        $v = $this->stripParentheses(static::get($match, 3));
+        $v = $this->stripParentheses(static::get($match, '3'));
         $v = ($v == '') ? '' : ',' . $v;
         return $this->phpTag . 'call_user_func($this->customDirectives[\'' . $match[1] . '\']' . $v . '); ?>';
     }
